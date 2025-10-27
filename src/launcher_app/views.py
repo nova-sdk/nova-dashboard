@@ -7,7 +7,7 @@ specified in urls.py file.
 import json
 import urllib.parse
 from importlib.resources import open_text
-from typing import Any
+from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib.auth import logout
@@ -51,25 +51,15 @@ def get_vuetify_config(request: HttpRequest) -> JsonResponse:
 
 
 @require_GET
-def ucams_redirect(request: HttpRequest) -> HttpResponseRedirect:
+def auth_redirect(request: HttpRequest, session_type: str) -> HttpResponseRedirect:
     auth_manager = AuthManager(request)
-    user_info = auth_manager.redirect_handler(request, "ucams")
+    user_info = auth_manager.redirect_handler(request, session_type)
 
     email = user_info["email"]
-    given_name = user_info["given_name"]
-
-    auth_manager.login(request, email, given_name)
-
-    return redirect("/")
-
-
-@require_GET
-def xcams_redirect(request: HttpRequest) -> HttpResponseRedirect:
-    auth_manager = AuthManager(request)
-    user_info = auth_manager.redirect_handler(request, "xcams")
-
-    email = user_info["email"]
-    given_name = user_info["givenName"]
+    try:
+        given_name = user_info["given_name"]
+    except KeyError:
+        given_name = user_info["givenName"]
 
     auth_manager.login(request, email, given_name)
 
@@ -109,25 +99,25 @@ def get_user(request: HttpRequest) -> JsonResponse:
         given_name = request.user.first_name  # type: ignore
         admin = is_admin(request.user)
 
-    return JsonResponse(
-        {
-            "given_name": given_name,
-            "is_admin": admin,
-            "is_logged_in": given_name is not None,
-            "ucams": _get_ucams_login_url(auth_manager),
-            "xcams": _get_xcams_login_url(auth_manager),
-        }
-    )
+    data: Dict[str, Any] = {
+        "given_name": given_name,
+        "is_admin": admin,
+        "is_logged_in": given_name is not None,
+        "auth_urls": {},
+    }
+    for provider_id, provider in settings.OAUTH_PROVIDERS.items():
+        data["auth_urls"][provider_id] = {"name": provider["name"], "url": _get_login_url(auth_manager, provider_id)}
+
+    return JsonResponse(data)
 
 
-def _get_ucams_login_url(auth_manager: AuthManager) -> str:
-    external_redirect = auth_manager.get_ucams_auth_url()
-    return f"{settings.GALAXY_UCAMS_URL}?external_redirect={urllib.parse.quote_plus(external_redirect)}"
+def _get_login_url(auth_manager: AuthManager, session_type: str) -> str:
+    external_redirect = auth_manager.get_auth_url(session_type)
 
+    login_url = f"{settings.OAUTH_PROVIDERS[session_type]['login_url']}"
+    login_url += f"?external_redirect={urllib.parse.quote_plus(external_redirect)}"
 
-def _get_xcams_login_url(auth_manager: AuthManager) -> str:
-    external_redirect = auth_manager.get_xcams_auth_url()
-    return f"{settings.GALAXY_XCAMS_URL}?external_redirect={urllib.parse.quote_plus(external_redirect)}"
+    return login_url
 
 
 def _create_galaxy_error(exception: Exception, **kwargs: Any) -> JsonResponse:

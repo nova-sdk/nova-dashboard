@@ -30,6 +30,6 @@ class OAuthSessionState(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)  # type: ignore
     galaxy_api_key = models.CharField(max_length=128, blank=True)  # type: ignore
     refresh_token = models.CharField(max_length=255, blank=True)  # type: ignore
-    # ucams or xcams
+    # which OAuth provider is being used
     session_type = models.CharField(max_length=32, blank=True)  # type: ignore
     state_param = models.CharField(max_length=128, blank=True)  # type: ignore

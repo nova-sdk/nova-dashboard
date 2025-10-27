@@ -115,25 +115,24 @@ SESSION_COOKIE_AGE = int(os.environ.get("SESSION_COOKIE_AGE", 60 * 60 * 24 * 14)
 
 # OAuth settings
 BASE_URL = os.environ["BASE_URL"]
-UCAMS_AUTH_URL = os.environ["UCAMS_AUTH_URL"]
-UCAMS_TOKEN_URL = os.environ["UCAMS_TOKEN_URL"]
-UCAMS_CLIENT_ID = os.environ["UCAMS_CLIENT_ID"]
-UCAMS_CLIENT_SECRET = os.environ["UCAMS_CLIENT_SECRET"]
-UCAMS_REDIRECT_PATH = os.environ["UCAMS_REDIRECT_PATH"]
-UCAMS_SCOPES = os.environ["UCAMS_SCOPES"]
-XCAMS_AUTH_URL = os.environ["XCAMS_AUTH_URL"]
-XCAMS_TOKEN_URL = os.environ["XCAMS_TOKEN_URL"]
-XCAMS_CLIENT_ID = os.environ["XCAMS_CLIENT_ID"]
-XCAMS_CLIENT_SECRET = os.environ["XCAMS_CLIENT_SECRET"]
-XCAMS_REDIRECT_PATH = os.environ["XCAMS_REDIRECT_PATH"]
-XCAMS_SCOPES = os.environ["XCAMS_SCOPES"]
+OAUTH_PROVIDERS = {}
+for provider_id in os.environ["OAUTH_PROVIDERS"].split():
+    env_prefix = provider_id.upper()
+    OAUTH_PROVIDERS[provider_id] = {
+        "name": os.environ.get(f"{env_prefix}_NAME"),
+        "auth_url": os.environ.get(f"{env_prefix}_AUTH_URL"),
+        "token_url": os.environ.get(f"{env_prefix}_TOKEN_URL"),
+        "client_id": os.environ.get(f"{env_prefix}_CLIENT_ID"),
+        "client_secret": os.environ.get(f"{env_prefix}_CLIENT_SECRET"),
+        "redirect_path": os.environ.get(f"{env_prefix}_REDIRECT_PATH"),
+        "scopes": os.environ.get(f"{env_prefix}_SCOPES"),
+        "login_url": os.environ.get(f"{env_prefix}_LOGIN_URL"),
+    }
 
 # Galaxy settings
 GALAXY_URL = os.environ["GALAXY_URL"]
 GALAXY_API_KEY_ENDPOINT = os.environ["GALAXY_API_KEY_ENDPOINT"]
 GALAXY_HISTORY_NAME = os.environ.get("GALAXY_HISTORY_NAME", "launcher_history")
-GALAXY_UCAMS_URL = os.environ.get("GALAXY_UCAMS_URL", "https://calvera-test.ornl.gov/authnz/azure/login")
-GALAXY_XCAMS_URL = os.environ.get("GALAXY_XCAMS_URL", "https://calvera-test.ornl.gov/authnz/pingfed/login")
 
 # System status settings
 ALERTS_ENVIRONMENTS = json.loads(os.environ.get("ALERTS_ENVIRONMENTS", "[]"))

@@ -14,8 +14,9 @@
                     <p class="mb-2">You must log in before your tool can be launched.</p>
 
                     <div>
-                        <v-btn :href="ucams_auth_url" class="mr-2">UCAMS</v-btn>
-                        <v-btn :href="xcams_auth_url">XCAMS</v-btn>
+                        <v-btn v-for="provider in auth_urls" :href="provider.url" class="mx-1">
+                            {{ provider.name }}
+                        </v-btn>
                     </div>
                 </div>
                 <div v-else>
@@ -50,7 +51,7 @@ const props = defineProps({
 const job = useJobStore()
 const { all_jobs, jobs } = storeToRefs(job)
 const user = useUserStore()
-const { checking_galaxy_login, is_logged_in, ucams_auth_url, xcams_auth_url } = storeToRefs(user)
+const { checking_galaxy_login, is_logged_in, auth_urls } = storeToRefs(user)
 const route = useRoute()
 const router = useRouter()
 

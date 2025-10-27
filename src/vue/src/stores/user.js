@@ -8,8 +8,7 @@ export const useUserStore = defineStore("user", {
             given_name: null,
             is_admin: false,
             is_logged_in: false,
-            ucams_auth_url: "/",
-            xcams_auth_url: "/",
+            auth_urls: [],
             requires_galaxy_login: false,
             monitor_interval: null,
             login_type: "",
@@ -24,8 +23,7 @@ export const useUserStore = defineStore("user", {
             this.given_name = data.given_name
             this.is_admin = data.is_admin
             this.is_logged_in = data.is_logged_in && !this.requires_galaxy_login
-            this.ucams_auth_url = data.ucams
-            this.xcams_auth_url = data.xcams
+            this.auth_urls = data.auth_urls
             this.ready = true
         },
         async userStatus() {

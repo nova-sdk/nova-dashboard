@@ -1,6 +1,6 @@
 """Defines a class for interacting with our OAuth providers.
 
-The UCAMS/XCAMS OAuth providers must be configured via your .env file. See
+The OAuth providers must be configured via your .env file. See
 .env.sample for the available configuration options.
 """
 
@@ -32,20 +32,15 @@ class AuthManager:
             except (KeyError, OAuthSessionState.DoesNotExist):
                 self.oauth_state = OAuthSessionState.objects.create(state_param=self.create_state_param())
 
-        self.ucams_session = OAuth2Session(
-            settings.UCAMS_CLIENT_ID,
-            auto_refresh_url=settings.UCAMS_TOKEN_URL,
-            redirect_uri=settings.BASE_URL + f"/{settings.UCAMS_REDIRECT_PATH}",
-            scope=settings.UCAMS_SCOPES.split(" "),
-            token_updater=self.save_access_token,
-        )
-        self.xcams_session = OAuth2Session(
-            settings.XCAMS_CLIENT_ID,
-            auto_refresh_url=settings.XCAMS_TOKEN_URL,
-            redirect_uri=settings.BASE_URL + f"/{settings.XCAMS_REDIRECT_PATH}",
-            scope=settings.XCAMS_SCOPES.split(" "),
-            token_updater=self.save_access_token,
-        )
+        self.sessions = {}
+        for provider_id, provider in settings.OAUTH_PROVIDERS.items():
+            self.sessions[provider_id] = OAuth2Session(
+                provider["client_id"],
+                auto_refresh_url=provider["token_url"],
+                redirect_uri=f"{settings.BASE_URL}/{provider['redirect_path']}",
+                scope=provider["scopes"].split(" "),
+                token_updater=self.save_access_token,
+            )
 
     def create_state_param(self) -> str:
         return get_random_string(length=128)
@@ -73,19 +68,11 @@ class AuthManager:
         self.oauth_state.session_type = session_type
         self.oauth_state.save()
 
-        match session_type:
-            case "ucams":
-                tokens = self.ucams_session.fetch_token(
-                    settings.UCAMS_TOKEN_URL,
-                    authorization_response=request.build_absolute_uri(),
-                    client_secret=settings.UCAMS_CLIENT_SECRET,
-                )
-            case "xcams":
-                tokens = self.xcams_session.fetch_token(
-                    settings.XCAMS_TOKEN_URL,
-                    authorization_response=request.build_absolute_uri(),
-                    client_secret=settings.XCAMS_CLIENT_SECRET,
-                )
+        tokens = self.sessions[session_type].fetch_token(
+            settings.OAUTH_PROVIDERS[session_type]["token_url"],
+            authorization_response=request.build_absolute_uri(),
+            client_secret=settings.OAUTH_PROVIDERS[session_type]["client_secret"],
+        )
 
         self.save_access_token(tokens["access_token"])
         self.save_refresh_token(tokens["refresh_token"])
@@ -115,19 +102,15 @@ class AuthManager:
         return self.oauth_state.galaxy_api_key
 
     def get_access_token(self) -> str:
-        match self.oauth_state.session_type:
-            case "ucams":
-                tokens = self.ucams_session.refresh_token(
-                    settings.UCAMS_TOKEN_URL,
-                    auth=HTTPBasicAuth(settings.UCAMS_CLIENT_ID, settings.UCAMS_CLIENT_SECRET),
-                    refresh_token=self.get_refresh_token(),
-                )
-            case "xcams":
-                tokens = self.xcams_session.refresh_token(
-                    settings.XCAMS_TOKEN_URL,
-                    auth=HTTPBasicAuth(settings.XCAMS_CLIENT_ID, settings.XCAMS_CLIENT_SECRET),
-                    refresh_token=self.get_refresh_token(),
-                )
+        session_type = self.oauth_state.session_type
+        tokens = self.sessions[session_type].refresh_token(
+            settings.OAUTH_PROVIDERS[session_type]["token_url"],
+            auth=HTTPBasicAuth(
+                settings.OAUTH_PROVIDERS[session_type]["client_id"],
+                settings.OAUTH_PROVIDERS[session_type]["client_secret"],
+            ),
+            refresh_token=self.get_refresh_token(),
+        )
 
         self.save_access_token(tokens["access_token"])
         self.save_refresh_token(tokens["refresh_token"])
@@ -137,11 +120,8 @@ class AuthManager:
     def get_refresh_token(self) -> str:
         return Fernet(settings.REFRESH_TOKEN_KEY).decrypt(self.oauth_state.refresh_token.encode()).decode()
 
-    def get_ucams_auth_url(self) -> str:
-        return self.ucams_session.authorization_url(settings.UCAMS_AUTH_URL)[0]
-
-    def get_xcams_auth_url(self) -> str:
-        return self.xcams_session.authorization_url(settings.XCAMS_AUTH_URL)[0]
+    def get_auth_url(self, session_type: str) -> str:
+        return self.sessions[session_type].authorization_url(settings.OAUTH_PROVIDERS[session_type]["auth_url"])[0]
 
     def save_access_token(self, token: str) -> None:
         self.oauth_state.access_token = token

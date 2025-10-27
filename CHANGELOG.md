@@ -1,3 +1,7 @@
+### nova-dashboard, 0.19.0
+
+* OAuth providers are now configured exclusively via the deployment environment (thanks to John Duggan).
+
 ### nova-dashboard, 0.18.1
 
 * Opening an autolaunch link while logged out will no longer fail (thanks to John Duggan).
