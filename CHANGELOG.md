@@ -1,3 +1,7 @@
+### nova-dashboard, 0.19.1
+
+* The Galaxy status banner will now visually indicate if monitoring is inaccessible (thanks to John Duggan).
+
 ### nova-dashboard, 0.19.0
 
 * OAuth providers are now configured exclusively via the deployment environment (thanks to John Duggan).
