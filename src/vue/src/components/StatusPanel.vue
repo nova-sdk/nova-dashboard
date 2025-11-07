@@ -15,7 +15,7 @@
                 {{ statusMessage(bannerStatus) }}
             </v-banner>
         </template>
-        <v-card>
+        <v-card v-if="showBanner">
             <v-card-title class="mb-2 px-0">{{ galaxyAlias }} System Status</v-card-title>
             <v-card-subtitle v-if="alertManager.monitoringUrl">
                 <v-btn :href="alertManager.monitoringUrl" target="_blank">
@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import AlertManager from "@/assets/js/alerts"
 
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
@@ -80,7 +80,15 @@ const alertManager = new AlertManager()
 const bannerStatus = ref("success")
 let pollInterval = null
 
+const showBanner = computed(() => {
+    return bannerStatus.value !== "unavailable"
+})
+
 const statusColor = (status) => {
+    if (status === "unavailable") {
+        return "grey"
+    }
+
     if (status === "critical") {
         return "error"
     }
@@ -105,6 +113,10 @@ const statusIcon = (status) => {
 }
 
 const statusMessage = (status) => {
+    if (status === "unavailable") {
+        return `Unable to check ${galaxyAlias} status.`
+    }
+
     if (status === "critical") {
         return `Some ${galaxyAlias} systems are experiencing outages. Hover for details.`
     }
@@ -121,6 +133,7 @@ const checkStatus = async () => {
         await alertManager.update()
         bannerStatus.value = alertManager.getStatus()
     } catch (error) {
+        bannerStatus.value = "unavailable"
         console.error(`Failed to retrieve ${galaxyAlias} system status:`, error)
     }
 }
