@@ -23,9 +23,9 @@ lint-check:
   stage: lint
   script:
     - docker build -f dockerfiles/Dockerfile --target source -t image .
-    - docker run -u `id -u`:`id -g` image poetry run ruff check
-    - docker run -u `id -u`:`id -g` image poetry run ruff format --check
-    - docker run -u `id -u`:`id -g` image poetry run mypy .
+    - docker run -u `id -u`:`id -g` image ruff check
+    - docker run -u `id -u`:`id -g` image ruff format --check
+    - docker run -u `id -u`:`id -g` image mypy .
     - docker run -u `id -u`:`id -g` -w /opt/run/vue image pnpm exec prettier --check .
     - docker run -u `id -u`:`id -g` -w /opt/run/vue image pnpm exec eslint .
     - docker tag image ${IMAGE_NAME}:src-${CI_COMMIT_SHA}
@@ -38,9 +38,9 @@ unit-tests:
   script:
     - mkdir reports
     - docker pull ${IMAGE_NAME}:src-${CI_COMMIT_SHA}
-    - docker run -u `id -u`:`id -g` -v `pwd`/reports:/opt/run/django/reports ${IMAGE_NAME}:src-${CI_COMMIT_SHA} poetry run coverage run
-    - docker run -u `id -u`:`id -g` -v `pwd`/reports:/opt/run/django/reports ${IMAGE_NAME}:src-${CI_COMMIT_SHA} poetry run coverage report
-    - docker run -u `id -u`:`id -g` -v `pwd`/reports:/opt/run/django/reports ${IMAGE_NAME}:src-${CI_COMMIT_SHA} poetry run coverage xml -o reports/coverage.xml
+    - docker run -u `id -u`:`id -g` -v `pwd`/reports:/opt/run/django/reports ${IMAGE_NAME}:src-${CI_COMMIT_SHA} coverage run
+    - docker run -u `id -u`:`id -g` -v `pwd`/reports:/opt/run/django/reports ${IMAGE_NAME}:src-${CI_COMMIT_SHA} coverage report
+    - docker run -u `id -u`:`id -g` -v `pwd`/reports:/opt/run/django/reports ${IMAGE_NAME}:src-${CI_COMMIT_SHA} coverage xml -o reports/coverage.xml
     - sed -i "s:<source>/src:<source>${CI_BUILDS_DIR}/${CI_PROJECT_PATH}:" reports/coverage.xml
 
   coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -77,17 +77,3 @@ build-image:
       fi
   tags:
     - rse-multi-builder
-# package-build:
-#   stage: package
-#   script:
-#     - >
-#       docker run
-#       -u `id -u`:`id -g`
-#       ${IMAGE_NAME}:src-${CI_COMMIT_SHA}
-#       bash -c "
-#       poetry config repositories.gitlab_repo ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi &&
-#       poetry publish -u gitlab-ci-token -p ${CI_JOB_TOKEN} -r gitlab_repo
-#       "
-#   when: manual
-#   tags:
-#     - rse-multi-builder

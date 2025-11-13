@@ -3,9 +3,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # make sure image can run as non-root user
 ENV PNPM_HOME=/pnpm
-ENV POETRY_CACHE_DIR=/poetry/.cache
-ENV POETRY_CONFIG_DIR=/poetry/.config
-ENV POETRY_HOME=/poetry
 
 RUN apt update && apt upgrade -y && apt install -y \
     curl \
@@ -15,10 +12,6 @@ RUN apt update && apt upgrade -y && apt install -y \
 RUN add-apt-repository ppa:deadsnakes/ppa -y
 RUN apt update && apt install -y \
     python3.10
-
-# Install Poetry
-RUN curl -fsSL https://install.python-poetry.org | python3.10 -
-ENV PATH="$PATH:$POETRY_HOME/bin"
 
 # Install Node.js LTS & pnpm
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
@@ -30,7 +23,12 @@ ENV PATH="$PATH:$PNPM_HOME"
 # Setup Django
 ADD ./ /opt/run/django
 WORKDIR /opt/run/django
-RUN poetry install
+
+RUN curl -fsSL https://pixi.sh/install.sh | sh
+ENV PATH="/root/.pixi/bin:${PATH}"
+RUN pixi install
+SHELL [ "pixi", "run", "--manifest-path", "/opt/run/django" ]
+ENTRYPOINT [ "pixi", "run", "--manifest-path", "/opt/run/django" ]
 
 # Setup Vue.js
 ADD src/vue /opt/run/vue
@@ -39,7 +37,6 @@ RUN pnpm install
 
 WORKDIR /opt/run/django
 RUN chmod og+rwX -R /pnpm
-RUN chmod og+rwX -R /poetry
 RUN chmod og+rwX -R /opt/run/django
 RUN chmod og+rwX -R /opt/run/vue
 
@@ -48,7 +45,7 @@ FROM source AS run
 
 # Install dependencies only used in production builds
 WORKDIR /opt/run/django
-RUN poetry run pip install gunicorn uvicorn-worker
+RUN pixi add --pypi gunicorn uvicorn-worker
 
 # Create static client build
 WORKDIR /opt/run/vue

@@ -11,7 +11,7 @@ import vuetify from "vite-plugin-vuetify"
 export default defineConfig(() => {
     const tomlData = fs.readFileSync("../../pyproject.toml", "utf8")
     const tomlObj = toml.parse(tomlData)
-    const version = tomlObj.tool.poetry.version
+    const version = tomlObj.project.version
 
     // eslint-disable-next-line no-undef
     process.env = { ...process.env, VITE_DASHBOARD_VERSION: version }

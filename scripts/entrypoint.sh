@@ -20,5 +20,5 @@ export AUTH_REDIRECTS=$paths
 envsubst '$AUTH_REDIRECTS' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 service nginx restart
 
-poetry run python manage.py migrate
-poetry run python -m gunicorn src.launcher_app.asgi:application -k uvicorn.workers.UvicornWorker -w 4
+pixi run python manage.py migrate
+pixi run python -m gunicorn src.launcher_app.asgi:application -k uvicorn.workers.UvicornWorker -w 4
