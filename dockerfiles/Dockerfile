@@ -27,8 +27,8 @@ WORKDIR /opt/run/django
 RUN curl -fsSL https://pixi.sh/install.sh | sh
 ENV PATH="/root/.pixi/bin:${PATH}"
 RUN pixi install
-SHELL [ "pixi", "run" ]
-ENTRYPOINT [ "pixi", "run" ]
+SHELL [ "pixi", "run", "--manifest-path", "/opt/vue/django" ]
+ENTRYPOINT [ "pixi", "run", "--manifest-path", "/opt/vue/django" ]
 
 # Setup Vue.js
 ADD src/vue /opt/run/vue
