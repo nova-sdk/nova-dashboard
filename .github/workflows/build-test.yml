@@ -34,16 +34,16 @@ jobs:
           load: true
           target: source
       - name: Run ruff check
-        run: docker run --rm ${{ steps.build.outputs.imageid }} poetry run ruff check
+        run: docker run --rm ${{ steps.build.outputs.imageid }} ruff check
       - name: Run format check
-        run: docker run --rm ${{ steps.build.outputs.imageid }} poetry run ruff format --check
+        run: docker run --rm ${{ steps.build.outputs.imageid }} ruff format --check
       - name: Run mypy
-        run: docker run --rm ${{ steps.build.outputs.imageid }} poetry run mypy .
+        run: docker run --rm ${{ steps.build.outputs.imageid }} mypy .
       - name: Run Prettier
         run: docker run --rm -w /opt/run/vue ${{ steps.build.outputs.imageid }} pnpm exec prettier --check .
       - name: Run eslint
         run: docker run --rm -w /opt/run/vue ${{ steps.build.outputs.imageid }} pnpm exec eslint .
       - name: Unit tests
-        run: docker run --rm ${{ steps.build.outputs.imageid }} poetry run pytest
+        run: docker run --rm ${{ steps.build.outputs.imageid }} pytest
       - name: Run coverage
-        run: docker run --rm ${{ steps.build.outputs.imageid }} sh -c "poetry run coverage run && poetry run coverage report"
+        run: docker run --rm ${{ steps.build.outputs.imageid }} sh -c "coverage run && coverage report"

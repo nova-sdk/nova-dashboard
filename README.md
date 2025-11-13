@@ -5,12 +5,12 @@ way for users to launch interactive tools without going through Calvera.
 
 ## Install dependencies
 
-You will need to install [Poetry](https://python-poetry.org/) and [pnpm](https://pnpm.io/). After doing so, you can run
+You will need to install [Pixi](https://pixi.sh/latest/) and [pnpm](https://pnpm.io/). After doing so, you can run
 the following commands to build the source code.
 
 ```bash
-poetry install
-poetry run ./manage.py migrate
+pixi install
+pixi run ./manage.py migrate
 ```
 
 ```bash
@@ -35,13 +35,12 @@ pnpm run dev --host 0.0.0.0 --port 5173
 After that to start the application (from the root directory):
 
 ```bash
-poetry run ./manage.py runserver_plus --insecure 0.0.0.0:8080
+pixi run ./manage.py runserver_plus --insecure 0.0.0.0:8080
 ```
 
 ## Develop
 
-Run `poetry env info  --path` to see the path to Poetry environment. It can then be used
-to configure your IDE to select the correct Python interpreter.
+Pixi will create a `.pixi` folder containing a virtual environment for this project. Please configure your IDE to use this environment.
 
 ## Docker
 
