@@ -8,7 +8,6 @@ GALAXY_HISTORY_NAME setting.
 """
 
 import logging
-from time import sleep
 from typing import Any, Dict, List, Optional, TypedDict
 
 from bs4 import BeautifulSoup
@@ -179,8 +178,6 @@ class GalaxyManager:
 
             tool.run(data_store=store, params=launch_params, wait=False)
 
-            while not tool.get_uid():
-                sleep(0.1)
             return tool.get_uid()
 
     def monitor_jobs(self, tool_ids: Dict[str, str]) -> list:
