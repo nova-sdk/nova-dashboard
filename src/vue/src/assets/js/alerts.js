@@ -152,6 +152,7 @@ export default class AlertManager {
         this.services = {
             infrastructure: new Service("Infrastructure"),
             instrument_data: new Service("Instrument Data", INSTRUMENT_ALIASES),
+            oncat: new Service("ONCat"),
             compute: new Service("Compute Resources", await this.getAliases("compute")),
             live_data: new Service("Live Data"),
             documentation: new Service("Documentation")

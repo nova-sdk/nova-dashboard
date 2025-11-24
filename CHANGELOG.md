@@ -1,3 +1,7 @@
+### nova-dashboard, 0.19.2
+
+* The status bar now shows the status of the ONCat proxy (thanks to Andrew Ayres and John Duggan).
+
 ### nova-dashboard, 0.19.1
 
 * The Galaxy status banner will now visually indicate if monitoring is inaccessible (thanks to John Duggan).
