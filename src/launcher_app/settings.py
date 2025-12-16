@@ -91,6 +91,8 @@ NOVA_ADMINS = json.loads(os.environ.get("ADMINISTRATOR_EMAILS", "[]"))
 
 # Prefix of tools to retrieve from Galaxy
 TOOL_PREFIX = os.environ.get("TOOL_PREFIX", "nova")
+# Tool ID that will always fail for testing error states.
+TEST_TOOL_ID = os.environ.get("TEST_TOOL_ID", "")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
