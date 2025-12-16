@@ -102,7 +102,7 @@ class GalaxyManager:
 
             for tool in galaxy_category.get("elems", []):
                 tool_id = tool["id"]
-                if not tool_id.startswith(settings.TOOL_PREFIX):
+                if not tool_id.startswith(settings.TOOL_PREFIX) and tool_id != settings.TEST_TOOL_ID:
                     continue
                 is_prototype_tool = "prototype" in tool_id
 
@@ -174,10 +174,10 @@ class GalaxyManager:
                     launch_params.add_input(key, value)
 
             # This allows us to test the error monitoring at will on the test instance
-            if tool_id == "neutrons_remote_command":
+            if tool_id == settings.TEST_TOOL_ID:
                 launch_params.add_input("command_mode|command", "fail")
 
-            tool.run(data_store=store, params=launch_params, wait=False)
+            tool.run_interactive(data_store=store, params=launch_params, check_url=False)
 
             return tool.get_uid()
 
