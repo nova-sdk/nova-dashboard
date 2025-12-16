@@ -1,3 +1,7 @@
+### nova-dashboard, 0.19.3
+
+* Fixes an issue where the monitor could hang while checking interactive tool URLs (thanks to John Duggan).
+
 ### nova-dashboard, 0.19.2
 
 * The status bar now shows the status of the ONCat proxy (thanks to Andrew Ayres and John Duggan).

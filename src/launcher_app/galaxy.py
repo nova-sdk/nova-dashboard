@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from nova.galaxy import Connection, Parameters, Tool
 from requests import get as requests_get
+from requests.exceptions import Timeout
 
 from .auth import AuthManager
 
@@ -218,14 +219,17 @@ class GalaxyManager:
                         state = job["state"]
                         url = tool.get_url(max_tries=1)
                         if url:
-                            response = connection.galaxy_instance.make_get_request(url)
-                            ready = (
-                                response.status_code == 200
-                                and "Proxy target missing"
-                                not in response.text  # Avoid the proxy target missing page appearing
-                                and "Javascript Required for Galaxy"
-                                not in response.text  # Avoid the Galaxy homepage appearing
-                            )
+                            try:
+                                response = connection.galaxy_instance.make_get_request(url, timeout=0.1)
+                                ready = (
+                                    response.status_code == 200
+                                    and "Proxy target missing"
+                                    not in response.text  # Avoid the proxy target missing page appearing
+                                    and "Javascript Required for Galaxy"
+                                    not in response.text  # Avoid the Galaxy homepage appearing
+                                )
+                            except Timeout:
+                                ready = False
                         else:
                             url = ""
                             ready = False
