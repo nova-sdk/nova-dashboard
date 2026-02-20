@@ -13,6 +13,7 @@ export const useJobStore = defineStore("job", {
             all_jobs: [],
             allow_autoopen: true,
             callback: null,
+            failed_jobs: [],
             galaxy_error: "",
             has_monitored: false,
             jobs: {},
@@ -177,14 +178,13 @@ export const useJobStore = defineStore("job", {
 
                     if (["deleted", "deleting", "ok"].includes(job.state)) {
                         delete this.jobs[job.tool_id]
-                    } else if (job.state === "error") {
-                        hasErrors = true
-                        this.galaxy_error = `Galaxy error: ${job.tool_id} is in an error state`
+                    } else if (job.state === "error" && !this.failed_jobs.includes(job.job_id)) {
+                        this.failed_jobs.push(job.job_id)
 
-                        // Clear the launch error
-                        setTimeout(() => {
-                            delete this.jobs[job.tool_id]
-                        }, this.error_reset_duration)
+                        hasErrors = true
+                        this.showErrorWithTimeout(
+                            `Galaxy error: ${job?.error ? job?.error : "something unexpected has occurred. Please try again."}`
+                        )
                     }
 
                     if (job.url && !this.jobs[job.tool_id].url_ready) {

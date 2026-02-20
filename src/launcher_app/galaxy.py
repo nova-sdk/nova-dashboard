@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+MAX_STDERR_LENGTH = 500
 TERMINAL_STATES = ["deleted", "deleting", "error", "ok"]
 NONTERMINAL_STATES = ["deleted_new", "failed", "new", "paused", "queued", "resubmitted", "running", "upload", "waiting"]
 
@@ -177,7 +178,7 @@ class GalaxyManager:
             if tool_id == settings.TEST_TOOL_ID:
                 launch_params.add_input("command_mode|command", "fail")
 
-            tool.run_interactive(data_store=store, params=launch_params, check_url=False)
+            tool.run_interactive(data_store=store, params=launch_params, check_url=False, wait=False)
 
             return tool.get_uid()
 
@@ -249,6 +250,11 @@ class GalaxyManager:
                                 for key in ["chromInfo", "dbkey", "__input_ext"]:
                                     parameters.pop(key, None)
                                 data["parameters"] = parameters
+                            if state == "error":
+                                stderr = connection.galaxy_instance.jobs.show_job(
+                                    data["job_id"], full_details=True
+                                ).get("stderr", "")[:MAX_STDERR_LENGTH]
+                                data["error"] = stderr
 
                             status_list.append(data)
                     except Exception:  # TODO: Might try to handle these better

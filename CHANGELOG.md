@@ -1,3 +1,7 @@
+### nova-dashboard, 0.19.5
+
+* Improves error handling for launched jobs (thanks to John Duggan).
+
 ### nova-dashboard, 0.19.4
 
 * Fixes autolaunching of tools (thanks to John Duggan).
