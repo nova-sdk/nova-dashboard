@@ -13,7 +13,6 @@ jobs:
     permissions: write-all
     env:
       GIT_STRATEGY: clone
-      IMAGE_NAME: "${NDIP_DOCKER_REPOSITORY}/${{ github.repository }}"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -39,14 +38,13 @@ jobs:
     timeout-minutes: 60
     env:
       GIT_STRATEGY: clone
-      IMAGE_NAME: "${NDIP_DOCKER_REPOSITORY}/${{ github.repository }}"
     steps:
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ secrets.NDIP_DOCKER_REGISTRY }}
+          username: ${{ secrets.NDIP_DOCKER_USER }}
+          password: ${{ secrets.NDIP_DOCKER_PASSWORD }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -66,4 +64,4 @@ jobs:
         with:
           file: dockerfiles/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/nova-dashboard:latest,ghcr.io/${{ github.repository_owner }}/nova-dashboard:${{ env.VERSION }}
+          tags: savannah.ornl.gov/ndip/nova-dashboard:latest,savannah.ornl.gov/ndip/nova-dashboard:${{ env.VERSION }}
