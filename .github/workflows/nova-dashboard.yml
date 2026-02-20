@@ -38,6 +38,7 @@ jobs:
     timeout-minutes: 60
     env:
       GIT_STRATEGY: clone
+      IMAGE_NAME: savannah.ornl.gov/ndip/nova-dashboard
     steps:
       - name: Login to Container Registry
         uses: docker/login-action@v3
@@ -57,11 +58,11 @@ jobs:
       - name: Parse version
         run: echo "VERSION=$(cat pyproject.toml | grep "version =" | head -n 1 | awk '{ print $3 }' | tr -d '"')" >> $GITHUB_ENV
       - name: Check if image already exists
-        run: if [ -n "$(docker manifest inspect ghcr.io/${{ github.repository_owner }}/nova-dashboard:${{ env.VERSION }})" ]; then echo "Image already exists, update the version and try again." && exit 1; fi
+        run: if [ -n "$(docker manifest inspect ${{ env.IMAGE_NAME }}:${{ env.VERSION }})" ]; then echo "Image already exists, update the version and try again." && exit 1; fi
       - name: Build and push
         uses: docker/build-push-action@v6
         id: build
         with:
           file: dockerfiles/Dockerfile
           push: true
-          tags: savannah.ornl.gov/ndip/nova-dashboard:latest,savannah.ornl.gov/ndip/nova-dashboard:${{ env.VERSION }}
+          tags: ${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:${{ env.VERSION }}
