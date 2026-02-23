@@ -124,7 +124,7 @@ onMounted(async () => {
         })
     }
 
-    if (hasInputs) {
+    if (hasInputs && user.is_logged_in) {
         targetJobId = await job.launchJob(targetTool.value.id, inputs)
         if (targetJobId === null) {
             // The tool failed to launch. launchJob will take care of error handling,
@@ -137,7 +137,7 @@ onMounted(async () => {
 
     job.startMonitor(false, monitorCallback, true)
     if (!user.is_logged_in) {
-        window.localStorage.setItem("lastpath", route.path)
+        window.localStorage.setItem("lastpath", route.fullPath)
         window.localStorage.setItem("redirect", true)
     }
 })

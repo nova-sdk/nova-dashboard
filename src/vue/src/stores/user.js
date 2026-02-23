@@ -32,7 +32,7 @@ export const useUserStore = defineStore("user", {
             const response = await fetch("/api/galaxy/user_status/")
             const data = await response.json()
 
-            if (response.status == 450) {
+            if (response.status === 450) {
                 this.is_logged_in = false
                 this.requires_galaxy_login = true
                 this.login_type = data["auth_type"]
