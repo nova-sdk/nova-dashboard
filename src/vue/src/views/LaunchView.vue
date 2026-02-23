@@ -127,6 +127,8 @@ onMounted(async () => {
     if (hasInputs) {
         targetJobId = await job.launchJob(targetTool.value.id, inputs)
         if (targetJobId === null) {
+            // The tool failed to launch. launchJob will take care of error handling,
+            // so there's nothing else to do until the user refreshes the page.
             return
         }
 
