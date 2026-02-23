@@ -4,7 +4,8 @@ import { nextTick } from "vue"
 
 import { useUserStore } from "@/stores/user"
 
-const galaxy_url = import.meta.env.VITE_GALAXY_URL
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
+const galaxyUrl = import.meta.env.VITE_GALAXY_URL
 
 export const useJobStore = defineStore("job", {
     state: () => {
@@ -15,6 +16,7 @@ export const useJobStore = defineStore("job", {
             callback: null,
             failed_jobs: [],
             galaxy_error: "",
+            static_error: false,
             has_monitored: false,
             jobs: {},
             running: false,
@@ -41,11 +43,10 @@ export const useJobStore = defineStore("job", {
                 try {
                     // Most of our views will return a JSON with a detailed error message.
                     const data = await response.json()
-                    message = `Galaxy error: ${data.error}`
+                    message = `${galaxyAlias} error: ${data.error}`
                 } catch {
                     // If we don't get a JSON back, then we fallback to a generic error message.
-                    message =
-                        "Galaxy failed to process your request. Please try again in a few minutes."
+                    message = `${galaxyAlias} failed to process your request. Please try again in a few minutes.`
                 }
             }
 
@@ -183,7 +184,7 @@ export const useJobStore = defineStore("job", {
 
                         hasErrors = true
                         this.showErrorWithTimeout(
-                            `Galaxy error: ${job?.error ? job?.error : "something unexpected has occurred. Please try again."}`
+                            `${galaxyAlias} error: ${job?.error ? job?.error : "something unexpected has occurred. Please try again."}`
                         )
                     }
 
@@ -229,13 +230,13 @@ export const useJobStore = defineStore("job", {
                         job.state = "error"
 
                         this.showErrorWithTimeout(
-                            `Galaxy error: Tool failed to respond within one minute. This may be due to an outage on ${galaxy_url}.`,
+                            `${galaxyAlias} error: Tool failed to respond within one minute. This may be due to an outage on ${galaxyUrl}.`,
                             tool_id
                         )
                     }
                 })
 
-                if (!hasErrors && !this.timeout_error) {
+                if (!hasErrors && !this.timeout_error && !this.static_error) {
                     this.galaxy_error = ""
                 }
             } else {

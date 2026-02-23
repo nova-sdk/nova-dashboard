@@ -8,6 +8,7 @@ GALAXY_HISTORY_NAME setting.
 """
 
 import logging
+from time import sleep
 from typing import Any, Dict, List, Optional, TypedDict
 
 from bs4 import BeautifulSoup
@@ -162,7 +163,7 @@ class GalaxyManager:
 
             launch_params = Parameters()
             for key, value in inputs.items():
-                if value.startswith("file_"):
+                if key.startswith("file_"):
                     # File will be ingested and contents will be passed to the tool.
                     id = self.ingest_file(connection, value)
                     if id is None:
@@ -180,7 +181,13 @@ class GalaxyManager:
 
             tool.run_interactive(data_store=store, params=launch_params, check_url=False, wait=False)
 
-            return tool.get_uid()
+            # With wait=False above, we need to wait until Galaxy has accepted the job and provided an ID.
+            job_id = tool.get_uid()
+            while not job_id:
+                sleep(0.05)
+                job_id = tool.get_uid()
+
+            return job_id
 
     def monitor_jobs(self, tool_ids: Dict[str, str]) -> list:
         status_list = []
@@ -200,6 +207,8 @@ class GalaxyManager:
                     limit=5,  # There are a lot of these, and we are only interested in the most recent ones.
                     order_by="create_time",
                     state=TERMINAL_STATES,
+                ) + connection.galaxy_instance.jobs.get_jobs(
+                    history_id=datafile_tools_store.history_id, limit=5, order_by="create_time", state=TERMINAL_STATES
                 )
                 # We only want to show terminal jobs if the dashboard is already aware of them. If the user refreshes
                 # the page after a job failed, then we don't want to display the error anymore.
@@ -218,7 +227,11 @@ class GalaxyManager:
                     tool.assign_id(new_id=job["id"], data_store=store)
                     try:
                         state = job["state"]
-                        url = tool.get_url(max_tries=1)
+
+                        url = ""
+                        if state != "error":
+                            url = tool.get_url(max_tries=1)
+
                         if url:
                             try:
                                 response = connection.galaxy_instance.make_get_request(url, timeout=0.1)
