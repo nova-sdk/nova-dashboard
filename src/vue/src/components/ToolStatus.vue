@@ -32,8 +32,12 @@ const props = defineProps({
     }
 })
 
-const galaxy_url = import.meta.env.VITE_GALAXY_URL
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const status_text = computed(() => {
+    if (props.state === "connecting") {
+        return `Connecting to ${galaxyAlias}...`
+    }
+
     if (props.state === "stopping") {
         return `Stopping application...`
     }

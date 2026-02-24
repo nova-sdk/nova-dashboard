@@ -1,3 +1,8 @@
+### nova-dashboard, 0.19.5
+
+* Fixes delayed responses from the job launch endpoint (thanks to John Duggan).
+* Improves error handling for launched jobs (thanks to John Duggan).
+
 ### nova-dashboard, 0.19.4
 
 * Fixes autolaunching of tools (thanks to John Duggan).

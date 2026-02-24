@@ -21,11 +21,9 @@
                 </div>
                 <div v-else>
                     <ToolStatus
-                        v-if="targetJob !== null"
-                        :state="targetJob.state"
-                        :url="targetJob.url"
+                        :state="targetJob !== null ? targetJob.state : 'connecting'"
+                        :url="targetJob !== null ? targetJob.url : ''"
                     />
-                    <v-progress-circular v-else indeterminate />
                 </div>
             </v-card-text>
         </v-card>
@@ -48,6 +46,8 @@ const props = defineProps({
     }
 })
 
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
+
 const job = useJobStore()
 const { all_jobs, jobs } = storeToRefs(job)
 const user = useUserStore()
@@ -55,45 +55,40 @@ const { checking_galaxy_login, is_logged_in, auth_urls } = storeToRefs(user)
 const route = useRoute()
 const router = useRouter()
 
-const foundInGalaxy = ref(false)
 const targetJob = ref(null)
 const targetTool = ref(null)
 let inputs = {}
 let hasInputs = false
+let launched = false
 let targetJobId = null
 
-function monitorCallback() {
+async function monitorCallback() {
     if (!is_logged_in || checking_galaxy_login.value || targetTool.value === null) {
         return
     }
 
-    if (hasInputs) {
-        for (const job of all_jobs.value) {
-            if (job.job_id === targetJobId) {
-                targetJob.value = job
-            }
-        }
-    } else {
-        for (const id in jobs.value) {
-            if (id === targetTool.value.id && jobs.value[id].state !== "stopped") {
-                foundInGalaxy.value = true
-                targetJob.value = jobs.value[id]
-            }
-        }
-
-        // We are logged in, the tool has been confirmed to exist, and we didn't find any job for it in Galaxy,
-        // so we can launch it here.
-        if (targetJob.value === null) {
-            job.launchJob(targetTool.value.id, inputs)
-            targetJob.value = jobs.value[targetTool.value.id]
+    for (const job of all_jobs.value) {
+        if (job.job_id === targetJobId) {
+            targetJob.value = job
         }
     }
 
-    if (
-        targetJob.value !== null &&
-        (targetJob.value.state === "ready" || targetJob.value.url_ready)
-    ) {
-        window.location.href = targetJob.value.url
+    if (!hasInputs && targetJob.value === null) {
+        // We are logged in, the tool has been confirmed to exist, and we didn't find any job for it in Galaxy,
+        // so we can launch it here.
+        if (targetJob.value === null && !launched) {
+            targetJobId = await job.launchJob(targetTool.value.id, inputs)
+            launched = true
+        }
+    }
+
+    if (targetJob.value !== null) {
+        if (targetJob.value?.state === "error") {
+            job.static_error = true
+            job.galaxy_error = `${galaxyAlias} error: ${targetJob.value?.error ? targetJob.value?.error : "something unexpected has occurred. Please try again."}`
+        } else if (targetJob.value?.state === "ready" || targetJob.value?.url_ready) {
+            window.location.href = targetJob.value.url
+        }
     }
 }
 
@@ -129,13 +124,20 @@ onMounted(async () => {
         })
     }
 
-    if (hasInputs) {
+    if (hasInputs && user.is_logged_in) {
         targetJobId = await job.launchJob(targetTool.value.id, inputs)
+        if (targetJobId === null) {
+            // The tool failed to launch. launchJob will take care of error handling,
+            // so there's nothing else to do until the user refreshes the page.
+            return
+        }
+
+        launched = true
     }
 
     job.startMonitor(false, monitorCallback, true)
     if (!user.is_logged_in) {
-        window.localStorage.setItem("lastpath", route.path)
+        window.localStorage.setItem("lastpath", route.fullPath)
         window.localStorage.setItem("redirect", true)
     }
 })

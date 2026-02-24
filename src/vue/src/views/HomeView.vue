@@ -13,7 +13,8 @@
                 <v-banner v-if="job.galaxy_error" class="bg-error text-center">
                     {{ job.galaxy_error }}
                 </v-banner>
-                <v-container v-else>
+
+                <v-container>
                     <v-row>
                         <v-col
                             v-for="(technique, key) in availableTechniques"

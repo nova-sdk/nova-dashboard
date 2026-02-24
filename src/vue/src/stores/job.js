@@ -4,7 +4,8 @@ import { nextTick } from "vue"
 
 import { useUserStore } from "@/stores/user"
 
-const galaxy_url = import.meta.env.VITE_GALAXY_URL
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
+const galaxyUrl = import.meta.env.VITE_GALAXY_URL
 
 export const useJobStore = defineStore("job", {
     state: () => {
@@ -13,7 +14,9 @@ export const useJobStore = defineStore("job", {
             all_jobs: [],
             allow_autoopen: true,
             callback: null,
+            failed_jobs: [],
             galaxy_error: "",
+            static_error: false,
             has_monitored: false,
             jobs: {},
             running: false,
@@ -40,11 +43,10 @@ export const useJobStore = defineStore("job", {
                 try {
                     // Most of our views will return a JSON with a detailed error message.
                     const data = await response.json()
-                    message = `Galaxy error: ${data.error}`
+                    message = `${galaxyAlias} error: ${data.error}`
                 } catch {
                     // If we don't get a JSON back, then we fallback to a generic error message.
-                    message =
-                        "Galaxy failed to process your request. Please try again in a few minutes."
+                    message = `${galaxyAlias} failed to process your request. Please try again in a few minutes.`
                 }
             }
 
@@ -177,14 +179,13 @@ export const useJobStore = defineStore("job", {
 
                     if (["deleted", "deleting", "ok"].includes(job.state)) {
                         delete this.jobs[job.tool_id]
-                    } else if (job.state === "error") {
-                        hasErrors = true
-                        this.galaxy_error = `Galaxy error: ${job.tool_id} is in an error state`
+                    } else if (job.state === "error" && !this.failed_jobs.includes(job.job_id)) {
+                        this.failed_jobs.push(job.job_id)
 
-                        // Clear the launch error
-                        setTimeout(() => {
-                            delete this.jobs[job.tool_id]
-                        }, this.error_reset_duration)
+                        hasErrors = true
+                        this.showErrorWithTimeout(
+                            `${galaxyAlias} error: ${job?.error ? job?.error : "something unexpected has occurred. Please try again."}`
+                        )
                     }
 
                     if (job.url && !this.jobs[job.tool_id].url_ready) {
@@ -229,13 +230,13 @@ export const useJobStore = defineStore("job", {
                         job.state = "error"
 
                         this.showErrorWithTimeout(
-                            `Galaxy error: Tool failed to respond within one minute. This may be due to an outage on ${galaxy_url}.`,
+                            `${galaxyAlias} error: Tool failed to respond within one minute. This may be due to an outage on ${galaxyUrl}.`,
                             tool_id
                         )
                     }
                 })
 
-                if (!hasErrors && !this.timeout_error) {
+                if (!hasErrors && !this.timeout_error && !this.static_error) {
                     this.galaxy_error = ""
                 }
             } else {
