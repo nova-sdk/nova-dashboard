@@ -4,6 +4,7 @@ import { nextTick } from "vue"
 
 import { useUserStore } from "@/stores/user"
 
+const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
 
@@ -83,7 +84,7 @@ export const useJobStore = defineStore("job", {
                 return
             }
 
-            const response = await fetch("/api/galaxy/launch/", {
+            const response = await fetch(`${basePath}api/galaxy/launch/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -116,7 +117,7 @@ export const useJobStore = defineStore("job", {
                 this.updateCalveraSpinner()
             }
 
-            const response = await fetch("/api/galaxy/stop/", {
+            const response = await fetch(`${basePath}api/galaxy/stop/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -141,7 +142,7 @@ export const useJobStore = defineStore("job", {
             for (const j in this.jobs) {
                 job_ids[j] = this.jobs[j].id
             }
-            const response = await fetch("/api/galaxy/monitor/", {
+            const response = await fetch(`${basePath}api/galaxy/monitor/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

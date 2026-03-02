@@ -17,9 +17,10 @@ export function getTools() {
 }
 
 export default async function initRouter() {
+    const basePath = import.meta.env.VITE_BASE_PATH
     const dashboardTitle = import.meta.env.VITE_DASHBOARD_TITLE
     const job = useJobStore()
-    const response = await fetch("/api/galaxy/tools/")
+    const response = await fetch(`${basePath}api/galaxy/tools/`)
     const toolResponse = await response.json()
     if (response.status === 500) {
         job.galaxy_error = toolResponse.error

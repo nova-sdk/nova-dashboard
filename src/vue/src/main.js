@@ -15,7 +15,7 @@ import "@/assets/core_style.scss"
 
 const basePath = import.meta.env.VITE_BASE_PATH
 
-fetch(`${basePath}vuetify_config.json`)
+fetch(`${basePath}api/vuetify_config.json`)
     .then((response) => response.json())
     .then(async (config) => {
         const app = createApp(App)
