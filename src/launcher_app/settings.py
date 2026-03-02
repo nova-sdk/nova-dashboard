@@ -31,8 +31,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "https://nova.ornl.gov",
     "https://nova-test.ornl.gov",
-    "https://ndip.ornl.gov/nova",
-    "https://ndip-test.ornl.gov/nova",
+    "https://ndip.ornl.gov",
+    "https://ndip-test.ornl.gov",
 ]
 
 # Application definition
