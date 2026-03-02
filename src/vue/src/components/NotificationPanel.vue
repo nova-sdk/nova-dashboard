@@ -37,9 +37,11 @@ import { useUserStore } from "@/stores/user"
 const user = useUserStore()
 const { is_admin } = storeToRefs(user)
 
+const basePath = import.meta.env.VITE_BASE_PATH
+
 const displayNotification = ref(false)
 const notificationMessage = ref("")
-const notificationUrl = "/api/notification/"
+const notificationUrl = `${basePath}api/notification/`
 let pollInterval = null
 
 async function getNotification() {
