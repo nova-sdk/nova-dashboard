@@ -13,19 +13,19 @@ http {
         server_name  localhost;
 
         location /nova/vuetify_config.json {
-            proxy_pass                  http://localhost:8000;
+            proxy_pass                  http://localhost:8000/nova;
             proxy_pass_request_headers  on;
             proxy_set_header            Host $host;
         }
 
         location /nova/logout {
-            proxy_pass                  http://localhost:8000;
+            proxy_pass                  http://localhost:8000/nova;
             proxy_pass_request_headers  on;
             proxy_set_header            Host $host;
         }
 
         location /nova/api {
-            proxy_pass                  http://localhost:8000/api;
+            proxy_pass                  http://localhost:8000/nova/api;
             proxy_pass_request_headers  on;
             proxy_set_header            Host $host;
         }
