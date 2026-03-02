@@ -31,25 +31,25 @@ export default async function initRouter() {
         history: createWebHistory(import.meta.env.VITE_BASE_PATH), // This is html5 mode for Vue Router
         routes: [
             {
-                path: "/",
+                path: basePath,
                 name: "home",
                 component: HomeView,
                 props: { tools }
             },
             {
-                path: "/:category",
+                path: `${basePath}:category`,
                 name: "category",
                 component: CategoryView,
                 props: { tools }
             },
             {
-                path: "/launch/:tool",
+                path: `${basePath}launch/:tool`,
                 name: "launch",
                 component: LaunchView,
                 props: { tools }
             },
             {
-                path: "/:catchAll(.*)*",
+                path: `${basePath}:catchAll(.*)*`,
                 name: "not-found",
                 component: NotFoundView
             }
