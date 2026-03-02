@@ -28,7 +28,7 @@ export default async function initRouter() {
     tools = toolResponse.tools
 
     const router = createRouter({
-        history: createWebHistory(import.meta.env.VITE_BASE_PATH), // This is html5 mode for Vue Router
+        history: createWebHistory(), // This is html5 mode for Vue Router
         routes: [
             {
                 path: basePath,

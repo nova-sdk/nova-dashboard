@@ -23,7 +23,7 @@
                             lg="4"
                         >
                             <v-card
-                                :to="`/${key}`"
+                                :to="`${basePath}${key}`"
                                 class="d-flex fill-height flex-column justify-center"
                             >
                                 <v-card-item>
@@ -57,6 +57,7 @@ const router = useRouter()
 const job = useJobStore()
 const user = useUserStore()
 
+const basePath = import.meta.env.VITE_BASE_PATH
 const dashboardTitle = import.meta.env.VITE_DASHBOARD_TITLE
 
 const availableTechniques = computed(() => {

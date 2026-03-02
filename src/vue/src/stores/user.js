@@ -9,7 +9,6 @@ export const useUserStore = defineStore("user", {
             is_admin: false,
             is_logged_in: false,
             monitor_interval: null,
-            login_type: "",
             ready: false
         }
     },
@@ -19,15 +18,16 @@ export const useUserStore = defineStore("user", {
             const userData = await userResponse.json()
             if (userData === null) {
                 // User is not logged in.
+                this.ready = true
                 return
             }
             this.email = userData.email
             this.is_logged_in = true
+            this.ready = true
 
             const apiKeyResponse = await fetch(`/api/users/${userData.id}/api_key/detailed`)
             const apiKeyData = await apiKeyResponse.json()
             this.apiKey = apiKeyData.key
-            this.ready = true
 
             // TODO
             // this.is_admin = await fetch(`${basePath}api/`)

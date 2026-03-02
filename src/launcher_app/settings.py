@@ -26,11 +26,13 @@ REFRESH_TOKEN_KEY = os.environ["REFRESH_TOKEN_KEY"].encode()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ["DEBUG"] != "false"
 
-ALLOWED_HOSTS = ["localhost", "nova.ornl.gov", "nova-test.ornl.gov"]
+ALLOWED_HOSTS = ["localhost", "nova.ornl.gov", "nova-test.ornl.gov", "ndip.ornl.gov", "ndip-test.ornl.gov"]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "https://nova.ornl.gov",
     "https://nova-test.ornl.gov",
+    "https://ndip.ornl.gov/nova",
+    "https://ndip-test.ornl.gov/nova",
 ]
 
 # Application definition
