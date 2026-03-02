@@ -25,6 +25,7 @@ def is_admin(user: AbstractBaseUser) -> bool:
     return user.get_username() in settings.NOVA_ADMINS
 
 
+@ensure_csrf_cookie
 @require_GET
 def get_vuetify_config(request: HttpRequest) -> JsonResponse:
     with open_text("nova.trame.view.theme.assets", "vuetify_config.json") as vuetify_config:
@@ -97,7 +98,6 @@ def galaxy_stop(request: HttpRequest) -> HttpResponse:
         return _create_galaxy_error(e)
 
 
-@ensure_csrf_cookie
 @require_GET
 def galaxy_tools(request: HttpRequest) -> JsonResponse:
     try:

@@ -12,10 +12,14 @@ import "@mdi/font/css/materialdesignicons.css"
 import App from "@/App.vue"
 import initRouter from "@/router"
 import "@/assets/core_style.scss"
+import Cookies from "js-cookie"
 
 const basePath = import.meta.env.VITE_BASE_PATH
 
-fetch(`${basePath}api/vuetify_config.json`)
+// If csrftoken becomes invalid, then non-GET API endpoints will return 403 errors even if they don't require authentication.
+// This forces the token to be refreshed when the page loads.
+Cookies.remove("csrftoken")
+fetch(`${basePath}api/vuetify_config/`)
     .then((response) => response.json())
     .then(async (config) => {
         const app = createApp(App)

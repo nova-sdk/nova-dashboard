@@ -23,7 +23,7 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/vuetify_config.json", views.get_vuetify_config),
+    path("api/vuetify_config/", views.get_vuetify_config),
     path("api/status/alerts/", views.get_alerts),
     path("api/status/targets/", views.get_targets),
     path("api/galaxy/launch/", views.galaxy_launch),
