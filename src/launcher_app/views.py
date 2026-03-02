@@ -11,7 +11,6 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.models import AbstractBaseUser
-from django.core.exceptions import PermissionDenied
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -79,11 +78,6 @@ def _create_galaxy_error(exception: Exception, **kwargs: Any) -> JsonResponse:
 
 @require_POST
 def galaxy_launch(request: HttpRequest) -> HttpResponse:
-    # Normally, we would use a @login_required decorator in Django. This forces a redirect, though, which we don't want
-    # to happen since this view (and others like it below) are only accessed through fetch requests.
-    if not request.user.is_authenticated:
-        raise PermissionDenied()
-
     try:
         data = json.loads(request.body)
         galaxy_manager = GalaxyManager(data.get("api_key", ""))
@@ -97,9 +91,6 @@ def galaxy_launch(request: HttpRequest) -> HttpResponse:
 
 @require_POST
 def galaxy_monitor(request: HttpRequest) -> JsonResponse:
-    if not request.user.is_authenticated:
-        raise PermissionDenied()
-
     try:
         data = json.loads(request.body)
         galaxy_manager = GalaxyManager(data.get("api_key", ""))
@@ -111,9 +102,6 @@ def galaxy_monitor(request: HttpRequest) -> JsonResponse:
 
 @require_POST
 def galaxy_stop(request: HttpRequest) -> HttpResponse:
-    if not request.user.is_authenticated:
-        raise PermissionDenied()
-
     try:
         data = json.loads(request.body)
         galaxy_manager = GalaxyManager(data.get("api_key", ""))
@@ -142,9 +130,6 @@ def notification(request: HttpRequest) -> HttpResponse:
 
     if request.method == "GET":
         return JsonResponse(notification_manager.get())
-
-    if not request.user.is_authenticated or not is_admin(request.user):
-        raise PermissionDenied
 
     try:
         data = json.loads(request.body.decode("utf-8"))
