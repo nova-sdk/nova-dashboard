@@ -27,19 +27,12 @@ urlpatterns = [
     path("vuetify_config.json", views.get_vuetify_config),
     path("api/status/alerts/", views.get_alerts),
     path("api/status/targets/", views.get_targets),
-    path("api/auth/user/", views.get_user),
-    path("api/galaxy/user_status/", views.galaxy_user_status),
     path("api/galaxy/launch/", views.galaxy_launch),
     path("api/galaxy/monitor/", views.galaxy_monitor),
     path("api/galaxy/stop/", views.galaxy_stop),
     path("api/galaxy/tools/", views.galaxy_tools),
     path("api/notification/", views.notification),
 ]
-
-for provider_id, provider in settings.OAUTH_PROVIDERS.items():
-    urlpatterns += [
-        path(provider["redirect_path"], views.auth_redirect, {"session_type": provider_id}, name=provider["name"])
-    ]
 
 if settings.DEBUG:
     urlpatterns += [

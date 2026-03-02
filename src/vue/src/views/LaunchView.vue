@@ -13,11 +13,7 @@
                 <div v-if="!is_logged_in">
                     <p class="mb-2">You must log in before your tool can be launched.</p>
 
-                    <div>
-                        <v-btn v-for="provider in auth_urls" :href="provider.url" class="mx-1">
-                            {{ provider.name }}
-                        </v-btn>
-                    </div>
+                    <v-btn :href="loginUrl"> Login </v-btn>
                 </div>
                 <div v-else>
                     <ToolStatus
@@ -47,11 +43,12 @@ const props = defineProps({
 })
 
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
+const loginUrl = import.meta.env.VITE_LOGIN_URL
 
 const job = useJobStore()
-const { all_jobs, jobs } = storeToRefs(job)
+const { all_jobs } = storeToRefs(job)
 const user = useUserStore()
-const { checking_galaxy_login, is_logged_in, auth_urls } = storeToRefs(user)
+const { is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const router = useRouter()
 
@@ -63,7 +60,7 @@ let launched = false
 let targetJobId = null
 
 async function monitorCallback() {
-    if (!is_logged_in || checking_galaxy_login.value || targetTool.value === null) {
+    if (!is_logged_in || targetTool.value === null) {
         return
     }
 

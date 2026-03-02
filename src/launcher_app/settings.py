@@ -115,25 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Authentication timeout
 SESSION_COOKIE_AGE = int(os.environ.get("SESSION_COOKIE_AGE", 60 * 60 * 24 * 14))  # 2 weeks
 
-# OAuth settings
-BASE_URL = os.environ["BASE_URL"]
-OAUTH_PROVIDERS = {}
-for provider_id in os.environ["OAUTH_PROVIDERS"].split():
-    env_prefix = provider_id.upper()
-    OAUTH_PROVIDERS[provider_id] = {
-        "name": os.environ.get(f"{env_prefix}_NAME"),
-        "auth_url": os.environ.get(f"{env_prefix}_AUTH_URL"),
-        "token_url": os.environ.get(f"{env_prefix}_TOKEN_URL"),
-        "client_id": os.environ.get(f"{env_prefix}_CLIENT_ID"),
-        "client_secret": os.environ.get(f"{env_prefix}_CLIENT_SECRET"),
-        "redirect_path": os.environ.get(f"{env_prefix}_REDIRECT_PATH"),
-        "scopes": os.environ.get(f"{env_prefix}_SCOPES"),
-        "login_url": os.environ.get(f"{env_prefix}_LOGIN_URL"),
-    }
-
 # Galaxy settings
 GALAXY_URL = os.environ["GALAXY_URL"]
-GALAXY_API_KEY_ENDPOINT = os.environ["GALAXY_API_KEY_ENDPOINT"]
 GALAXY_HISTORY_NAME = os.environ.get("GALAXY_HISTORY_NAME", "launcher_history")
 
 # System status settings

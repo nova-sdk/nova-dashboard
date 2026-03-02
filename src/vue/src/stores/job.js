@@ -78,7 +78,6 @@ export const useJobStore = defineStore("job", {
             }
             this.updateCalveraSpinner()
 
-            await this.user.userStatus()
             if (this.requires_galaxy_login) {
                 this.jobs[tool_id].state = "stopped"
                 return
@@ -91,6 +90,7 @@ export const useJobStore = defineStore("job", {
                     "X-CSRFToken": Cookies.get("csrftoken")
                 },
                 body: JSON.stringify({
+                    api_key: this.user.apiKey,
                     tool_id: tool_id,
                     inputs: inputs
                 })
@@ -123,6 +123,7 @@ export const useJobStore = defineStore("job", {
                     "X-CSRFToken": Cookies.get("csrftoken")
                 },
                 body: JSON.stringify({
+                    api_key: this.user.apiKey,
                     job_id: job_id
                 })
             })
@@ -146,7 +147,10 @@ export const useJobStore = defineStore("job", {
                     "Content-Type": "application/json",
                     "X-CSRFToken": Cookies.get("csrftoken")
                 },
-                body: JSON.stringify({ tool_ids: job_ids })
+                body: JSON.stringify({
+                    api_key: this.user.apiKey,
+                    tool_ids: job_ids
+                })
             })
 
             if (response.status === 200) {
