@@ -8,7 +8,7 @@
                         class="cursor-pointer flex-0-1 mr-1"
                         @click="$router.push('/')"
                     >
-                        <v-img alt="NOVA Logo" src="/logo_bw.png" width="200" />
+                        <v-img :src="`${basePath}logo_bw.png`" alt="NOVA Logo" width="200" />
                     </v-app-bar-title>
 
                     <InfoPanel />
@@ -20,7 +20,11 @@
                     >
                         <v-tooltip activator="parent">{{ galaxyAlias }}</v-tooltip>
 
-                        <v-img alt="Galaxy Square Logo" src="/galaxy_icon.png" width="20" />
+                        <v-img
+                            :src="`${basePath}galaxy_icon.png`"
+                            alt="Galaxy Square Logo"
+                            width="20"
+                        />
                     </a>
                 </div>
 
@@ -176,6 +180,7 @@ const { autoopen, email, is_admin, is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const drawer = ref(false)
 const notificationPanel = ref(null)
+const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyDocsUrl = import.meta.env.VITE_GALAXY_DOCS_URL
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL

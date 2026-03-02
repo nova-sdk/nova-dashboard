@@ -16,6 +16,10 @@ export const useUserStore = defineStore("user", {
         async getUser() {
             const userResponse = await fetch("/api/whoami")
             const userData = await userResponse.json()
+            if (userData === null) {
+                // User is not logged in.
+                return
+            }
             this.email = userData.email
             this.is_logged_in = true
             this.ready = true
