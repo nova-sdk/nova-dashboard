@@ -13,7 +13,9 @@ import App from "@/App.vue"
 import initRouter from "@/router"
 import "@/assets/core_style.scss"
 
-fetch("/vuetify_config.json")
+const basePath = import.meta.env.VITE_BASE_PATH
+
+fetch(`${basePath}vuetify_config.json`)
     .then((response) => response.json())
     .then(async (config) => {
         const app = createApp(App)

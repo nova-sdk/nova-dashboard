@@ -9,17 +9,8 @@ from importlib.resources import open_text
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth import logout
 from django.contrib.auth.models import AbstractBaseUser
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseRedirect,
-    JsonResponse,
-    StreamingHttpResponse,
-)
-from django.shortcuts import redirect
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from requests import ConnectionError
@@ -32,13 +23,6 @@ from .status import StatusManager
 
 def is_admin(user: AbstractBaseUser) -> bool:
     return user.get_username() in settings.NOVA_ADMINS
-
-
-@require_GET
-def logout_user(request: HttpRequest) -> HttpResponseRedirect:
-    logout(request)
-
-    return redirect("/")
 
 
 @require_GET

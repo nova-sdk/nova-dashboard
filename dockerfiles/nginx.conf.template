@@ -12,25 +12,19 @@ http {
         listen       8080;
         server_name  localhost;
 
-        location /nova/vuetify_config.json {
-            proxy_pass                  http://localhost:8000/nova;
+        location /vuetify_config.json {
+            proxy_pass                  http://localhost:8000;
             proxy_pass_request_headers  on;
             proxy_set_header            Host $host;
         }
 
-        location /nova/logout {
-            proxy_pass                  http://localhost:8000/nova;
+        location /api {
+            proxy_pass                  http://localhost:8000/api;
             proxy_pass_request_headers  on;
             proxy_set_header            Host $host;
         }
 
-        location /nova/api {
-            proxy_pass                  http://localhost:8000/nova/api;
-            proxy_pass_request_headers  on;
-            proxy_set_header            Host $host;
-        }
-
-        location = /nova {
+        location = / {
             root /opt/run/vue/dist;
             add_header Cache-Control 'no-cache, no-store';
             add_header Vary *;
@@ -38,7 +32,7 @@ http {
             try_files /index.html =404;
         }
 
-        location /nova {
+        location / {
             root /opt/run/vue/dist;
             try_files $uri $uri/ @index;
         }

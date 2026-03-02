@@ -83,18 +83,6 @@
                             </v-card>
                         </v-menu>
                     </v-btn>
-
-                    <v-btn v-if="is_logged_in" icon>
-                        <v-icon>mdi-account-circle</v-icon>
-
-                        <v-menu activator="parent">
-                            <v-list>
-                                <v-list-item prepend-icon="mdi-logout" @click="logout">
-                                    Logout
-                                </v-list-item>
-                            </v-list>
-                        </v-menu>
-                    </v-btn>
                 </div>
             </v-app-bar>
 
@@ -205,10 +193,6 @@ onMounted(async () => {
 
 function toggleDrawer() {
     drawer.value = !drawer.value
-}
-
-function logout() {
-    // TODO
 }
 </script>
 
