@@ -6,7 +6,7 @@
                 <div class="app-bar-corner app-bar-start">
                     <v-app-bar-title
                         class="cursor-pointer flex-0-1 mr-1"
-                        @click="$router.push('/')"
+                        @click="$router.push(basePath)"
                     >
                         <v-img :src="`${basePath}logo_bw.png`" alt="NOVA Logo" width="200" />
                     </v-app-bar-title>
@@ -83,6 +83,18 @@
                             </v-card>
                         </v-menu>
                     </v-btn>
+
+                    <v-btn v-if="is_logged_in" icon>
+                        <v-icon>mdi-account-circle</v-icon>
+
+                        <v-menu activator="parent">
+                            <v-list>
+                                <v-list-item prepend-icon="mdi-logout" @click="logout">
+                                    Logout
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
+                    </v-btn>
                 </div>
             </v-app-bar>
 
@@ -148,6 +160,7 @@
 </template>
 
 <script setup>
+import Cookies from "js-cookie"
 import { computed, onMounted, ref } from "vue"
 import { storeToRefs } from "pinia"
 import { RouterView, useRoute } from "vue-router"
@@ -193,6 +206,11 @@ onMounted(async () => {
 
 function toggleDrawer() {
     drawer.value = !drawer.value
+}
+
+function logout() {
+    Cookies.remove("galaxysession")
+    window.location.reload()
 }
 </script>
 

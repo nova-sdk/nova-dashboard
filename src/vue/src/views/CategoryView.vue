@@ -1,7 +1,7 @@
 <!-- Defines the content when the user is viewing a category's tool list. -->
 <template>
     <v-breadcrumbs v-if="category !== null">
-        <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
+        <v-breadcrumbs-item :to="basePath">Home</v-breadcrumbs-item>
         <v-breadcrumbs-divider />
         <v-breadcrumbs-item>{{ category.name }}</v-breadcrumbs-item>
     </v-breadcrumbs>
@@ -73,6 +73,8 @@ const job = useJobStore()
 const { galaxy_error } = storeToRefs(job)
 const user = useUserStore()
 const category = ref(null)
+
+const basePath = import.meta.env.VITE_BASE_PATH
 
 onMounted(async () => {
     if (route.params.category in props.tools) {

@@ -138,6 +138,10 @@ export const useJobStore = defineStore("job", {
             }
         },
         async monitorJobs() {
+            if (this.user.apiKey === "") {
+                return
+            }
+
             const job_ids = {}
             for (const j in this.jobs) {
                 job_ids[j] = this.jobs[j].id

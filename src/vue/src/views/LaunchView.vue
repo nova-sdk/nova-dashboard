@@ -13,7 +13,7 @@
                 <div v-if="!is_logged_in">
                     <p class="mb-2">You must log in before your tool can be launched.</p>
 
-                    <v-btn :href="loginUrl"> Login </v-btn>
+                    <v-btn :href="loginUrl">Login</v-btn>
                 </div>
                 <div v-else>
                     <ToolStatus
@@ -46,7 +46,7 @@ const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const loginUrl = import.meta.env.VITE_LOGIN_URL
 
 const job = useJobStore()
-const { all_jobs } = storeToRefs(job)
+const { all_jobs, has_monitored } = storeToRefs(job)
 const user = useUserStore()
 const { is_logged_in } = storeToRefs(user)
 const route = useRoute()
@@ -60,7 +60,7 @@ let launched = false
 let targetJobId = null
 
 async function monitorCallback() {
-    if (!is_logged_in || targetTool.value === null) {
+    if (!has_monitored.value || !is_logged_in.value || targetTool.value === null) {
         return
     }
 

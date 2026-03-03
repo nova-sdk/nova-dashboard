@@ -1,5 +1,8 @@
 import { defineStore } from "pinia"
 
+const mockUserEmail = import.meta.env.VITE_MOCK_USER_EMAIL
+const mockUserApiKey = import.meta.env.VITE_MOCK_USER_API_KEY
+
 export const useUserStore = defineStore("user", {
     state: () => {
         return {
@@ -13,7 +16,21 @@ export const useUserStore = defineStore("user", {
         }
     },
     actions: {
+        mockUserLogin() {
+            this.email = mockUserEmail
+            this.is_logged_in = true
+            this.ready = true
+
+            window.setTimeout(() => {
+                this.apiKey = mockUserApiKey
+            })
+        },
         async getUser() {
+            if (mockUserEmail && mockUserApiKey) {
+                this.mockUserLogin()
+                return
+            }
+
             const userResponse = await fetch("/api/whoami")
             const userData = await userResponse.json()
             if (userData === null) {
