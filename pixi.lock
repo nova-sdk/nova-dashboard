@@ -141,7 +141,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/78/55/896b06bf93a49bec0f4ae2a6f1ed12bd05c8860744ac3a70eda041064e4d/virtualenv-21.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4d/ec/d58832f89ede95652fd01f4f24236af7d32b70cab2196dfcc2d2fd13c5c2/werkzeug-3.1.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/2f/60c51304fbdf47ce992d9eefa61fbd2c0e64feee60aaa439baf42ea6f40b/wrapt-2.1.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/6a/fd/0cd3c4ef6705d6edc903761aa36cd32451e41e860915518f13ff7623ea98/wslink-2.5.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/66/fe/b1e10b08d287f518994f1e2ff9b6d26f0adeecd8dd7d533b01bab29a3eda/yarl-1.23.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: ./
       osx-64:
@@ -266,7 +266,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/78/55/896b06bf93a49bec0f4ae2a6f1ed12bd05c8860744ac3a70eda041064e4d/virtualenv-21.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4d/ec/d58832f89ede95652fd01f4f24236af7d32b70cab2196dfcc2d2fd13c5c2/werkzeug-3.1.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f7/ca/3cf290212855b19af9fcc41b725b5620b32f470d6aad970c2593500817eb/wrapt-2.1.1-cp313-cp313-macosx_10_13_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/6a/fd/0cd3c4ef6705d6edc903761aa36cd32451e41e860915518f13ff7623ea98/wslink-2.5.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/67/b6/8925d68af039b835ae876db5838e82e76ec87b9782ecc97e192b809c4831/yarl-1.23.0-cp313-cp313-macosx_10_13_x86_64.whl
       - pypi: ./
   production:
@@ -389,7 +389,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/2f/60c51304fbdf47ce992d9eefa61fbd2c0e64feee60aaa439baf42ea6f40b/wrapt-2.1.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/6a/fd/0cd3c4ef6705d6edc903761aa36cd32451e41e860915518f13ff7623ea98/wslink-2.5.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/66/fe/b1e10b08d287f518994f1e2ff9b6d26f0adeecd8dd7d533b01bab29a3eda/yarl-1.23.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: ./
       osx-64:
@@ -493,7 +493,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f7/ca/3cf290212855b19af9fcc41b725b5620b32f470d6aad970c2593500817eb/wrapt-2.1.1-cp313-cp313-macosx_10_13_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/6a/fd/0cd3c4ef6705d6edc903761aa36cd32451e41e860915518f13ff7623ea98/wslink-2.5.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/67/b6/8925d68af039b835ae876db5838e82e76ec87b9782ecc97e192b809c4831/yarl-1.23.0-cp313-cp313-macosx_10_13_x86_64.whl
       - pypi: ./
 packages:
@@ -1561,8 +1561,8 @@ packages:
   requires_python: '>=3.10,<4.0'
 - pypi: ./
   name: nova-dashboard
-  version: 0.20.0.dev11
-  sha256: eb468173519d8a50571b63ba1aa99ea8a1337f5fc6e2ee1d9fc2e0435b42f2f7
+  version: 0.20.0.dev12
+  sha256: f57a6a2ecc859d2adc87f3be15864f937ce001e43913ac2add6568489464d946
   requires_python: '>=3.10,<3.14'
 - pypi: https://files.pythonhosted.org/packages/3a/e4/920714ccc00cece0725dd98f6daf3b03b7c9504db00b10d27e62e490b64c/nova_galaxy-0.11.6-py3-none-any.whl
   name: nova-galaxy
@@ -2353,10 +2353,10 @@ packages:
   - pytest ; extra == 'dev'
   - setuptools ; extra == 'dev'
   requires_python: '>=3.9'
-- pypi: https://files.pythonhosted.org/packages/6a/fd/0cd3c4ef6705d6edc903761aa36cd32451e41e860915518f13ff7623ea98/wslink-2.5.2-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
   name: wslink
-  version: 2.5.2
-  sha256: bdea0aa2e5b6aa30c0be74478b29a068743c6107922a2dfa0f162c1dcac395e7
+  version: 2.5.3
+  sha256: c6f16f2f9505204cd16e1a076533c262362a059bd545b9ae36c1d6f67e5ae54b
   requires_dist:
   - aiohttp<4
   - msgpack>=1,<2

@@ -68,6 +68,11 @@ export const useJobStore = defineStore("job", {
 
             this.galaxy_error = message
         },
+        async galaxyFetch(endpoint, options) {
+            await this.user.getUserId()
+
+            return await fetch(`${basePath}${endpoint}`, options)
+        },
         async launchJob(tool_id, inputs) {
             this.jobs[tool_id] = {
                 id: "",
@@ -84,7 +89,7 @@ export const useJobStore = defineStore("job", {
                 return
             }
 
-            const response = await fetch(`${basePath}api/galaxy/launch/`, {
+            const response = await this.galaxyFetch("api/galaxy/launch/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -117,7 +122,7 @@ export const useJobStore = defineStore("job", {
                 this.updateCalveraSpinner()
             }
 
-            const response = await fetch(`${basePath}api/galaxy/stop/`, {
+            const response = await this.galaxyFetch("api/galaxy/stop/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -146,7 +151,7 @@ export const useJobStore = defineStore("job", {
             for (const j in this.jobs) {
                 job_ids[j] = this.jobs[j].id
             }
-            const response = await fetch(`${basePath}api/galaxy/monitor/`, {
+            const response = await this.galaxyFetch("api/galaxy/monitor/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

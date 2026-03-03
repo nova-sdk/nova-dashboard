@@ -41,6 +41,10 @@ export const useUserStore = defineStore("user", {
             this.getAdmin()
         },
         async getUserId() {
+            if (mockUserEmail && mockUserApiKey) {
+                return
+            }
+
             const userResponse = await fetch("/api/whoami")
             const userData = await userResponse.json()
             if (userData === null) {
@@ -49,6 +53,10 @@ export const useUserStore = defineStore("user", {
                 return
             }
             this.email = userData.email
+
+            if (this.id !== "" && this.id !== userData.id) {
+                window.location.reload()
+            }
             this.id = userData.id
             this.is_logged_in = true
             this.ready = true
