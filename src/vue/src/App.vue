@@ -89,8 +89,8 @@
 
                         <v-menu activator="parent">
                             <v-list>
-                                <v-list-item prepend-icon="mdi-logout" @click="logout">
-                                    Logout
+                                <v-list-item prepend-icon="mdi-logout" href="/user">
+                                    Logout via {{ galaxyAlias }}
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -206,11 +206,6 @@ onMounted(async () => {
 
 function toggleDrawer() {
     drawer.value = !drawer.value
-}
-
-function logout() {
-    Cookies.remove("galaxysession")
-    window.location.reload()
 }
 </script>
 

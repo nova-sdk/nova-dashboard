@@ -57,7 +57,7 @@ export const useUserStore = defineStore("user", {
             if (mockUserEmail && mockUserApiKey) {
                 this.mockUserLogin()
             } else {
-                this.getUserId()
+                await this.getUserId()
                 this.getApiKey()
             }
         },
