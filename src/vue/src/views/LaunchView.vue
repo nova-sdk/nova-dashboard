@@ -122,6 +122,8 @@ onMounted(async () => {
     }
 
     if (hasInputs && user.is_logged_in) {
+        await user.getApiKey()
+
         targetJobId = await job.launchJob(targetTool.value.id, inputs)
         if (targetJobId === null) {
             // The tool failed to launch. launchJob will take care of error handling,
