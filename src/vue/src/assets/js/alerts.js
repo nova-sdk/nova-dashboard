@@ -140,7 +140,6 @@ export default class AlertManager {
 
         this.alerts = []
         this.services = null
-        this.monitoringUrl = ""
     }
 
     reset() {
@@ -194,7 +193,6 @@ export default class AlertManager {
 
         const response = await fetch(this.alertsUrl)
         const data = await response.json()
-        this.monitoringUrl = data?.url
 
         this.reset()
 

@@ -75,6 +75,7 @@ async function setNotification() {
                 "X-CSRFToken": Cookies.get("csrftoken")
             },
             body: JSON.stringify({
+                api_key: user.apiKey,
                 display: displayNotification.value,
                 message: notificationMessage.value
             })

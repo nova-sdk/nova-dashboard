@@ -88,9 +88,6 @@ DATABASES = {
     }
 }
 
-# List of emails that can edit the system notification
-NOVA_ADMINS = json.loads(os.environ.get("ADMINISTRATOR_EMAILS", "[]"))
-
 # Prefix of tools to retrieve from Galaxy
 TOOL_PREFIX = os.environ.get("TOOL_PREFIX", "nova")
 # Tool ID that will always fail for testing error states.

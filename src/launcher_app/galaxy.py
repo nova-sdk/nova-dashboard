@@ -139,6 +139,13 @@ class GalaxyManager:
         except Exception:
             return None
 
+    def is_admin(self) -> bool:
+        try:
+            with self.connection.connect() as connection:
+                return connection.galaxy_instance.users.get_current_user()["is_admin"]
+        except Exception:
+            return False
+
     def launch_job(self, tool_id: str, inputs: dict[str, str]) -> str:
         with self.connection.connect() as connection:
             if inputs:

@@ -9,7 +9,7 @@ from importlib.resources import open_text
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
@@ -19,10 +19,6 @@ from requests import request as proxy_request
 from .galaxy import GalaxyManager
 from .notification import NotificationManager
 from .status import StatusManager
-
-
-def is_admin(user: AbstractBaseUser) -> bool:
-    return user.get_username() in settings.NOVA_ADMINS
 
 
 @ensure_csrf_cookie
@@ -36,10 +32,7 @@ def get_vuetify_config(request: HttpRequest) -> JsonResponse:
 def get_alerts(request: HttpRequest) -> JsonResponse:
     status_manager = StatusManager()
 
-    alert_data = {
-        "alerts": status_manager.get_alerts(),
-        "url": settings.MONITORING_URL if request.user.is_authenticated and is_admin(request.user) else "",
-    }
+    alert_data = {"alerts": status_manager.get_alerts()}
 
     return JsonResponse(alert_data)
 
@@ -59,6 +52,17 @@ def _create_galaxy_error(exception: Exception, **kwargs: Any) -> JsonResponse:
         message = f"Unable to connect to Galaxy, {settings.GALAXY_URL} may be restarting."
 
     return JsonResponse({"error": message, **kwargs}, status=500)
+
+
+@require_POST
+def galaxy_is_admin(request: HttpRequest) -> HttpResponse:
+    try:
+        data = json.loads(request.body)
+        galaxy_manager = GalaxyManager(data.get("api_key", ""))
+
+        return JsonResponse({"is_admin": galaxy_manager.is_admin()})
+    except Exception as e:
+        return _create_galaxy_error(e)
 
 
 @require_POST
@@ -117,6 +121,10 @@ def notification(request: HttpRequest) -> HttpResponse:
 
     try:
         data = json.loads(request.body.decode("utf-8"))
+        galaxy_manager = GalaxyManager(data.get("api_key", ""))
+        if not galaxy_manager.is_admin():
+            raise PermissionDenied()
+
         notification_manager.set(data)
     except Exception:
         return HttpResponseBadRequest("message parameter is missing")
