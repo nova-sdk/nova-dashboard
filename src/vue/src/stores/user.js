@@ -10,11 +10,11 @@ export const useUserStore = defineStore("user", {
         return {
             apiKey: "",
             autoopen: false, // if true, tools will open in a new tab once they've successfully launched
+            delay: 2000,
             email: null,
             id: "",
             is_admin: false,
             is_logged_in: false,
-            monitor_interval: null,
             ready: false
         }
     },
@@ -49,6 +49,10 @@ export const useUserStore = defineStore("user", {
             const userData = await userResponse.json()
             if (userData === null) {
                 // User is not logged in.
+                if (this.id !== "") {
+                    window.location.reload()
+                }
+
                 this.ready = true
                 return
             }
@@ -68,6 +72,12 @@ export const useUserStore = defineStore("user", {
                 await this.getUserId()
                 this.getApiKey()
             }
+
+            if (this.id === "") {
+                window.setTimeout(() => {
+                    this.getUser()
+                }, this.delay)
+            }
         },
         mockUserLogin() {
             this.email = mockUserEmail
@@ -77,7 +87,7 @@ export const useUserStore = defineStore("user", {
             window.setTimeout(() => {
                 this.apiKey = mockUserApiKey
                 this.getAdmin()
-            })
+            }, this.delay)
         },
         getAutoopen() {
             this.autoopen = window.localStorage.getItem("autoopen") === "true"

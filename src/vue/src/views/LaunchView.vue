@@ -52,6 +52,7 @@ const { is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const router = useRouter()
 
+const delay = 2000
 const targetJob = ref(null)
 const targetTool = ref(null)
 let inputs = {}
@@ -132,6 +133,12 @@ onMounted(async () => {
         }
 
         launched = true
+    } else if (hasInputs) {
+        while (user.id === "") {
+            await user.getUser()
+            // Sleep
+            await new Promise((resolve) => setTimeout(resolve, delay))
+        }
     }
 
     job.startMonitor(false, monitorCallback, true)

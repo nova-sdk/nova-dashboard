@@ -1,6 +1,6 @@
 [project]
 name = "nova-dashboard"
-version = "0.20.0-dev12"
+version = "0.20.0-dev13"
 description = ""
 authors = [
     { name = "Yakubov, Sergey", email = "yakubovs@ornl.gov" },
