@@ -6,9 +6,9 @@
                 <div class="app-bar-corner app-bar-start">
                     <v-app-bar-title
                         class="cursor-pointer flex-0-1 mr-1"
-                        @click="$router.push('/')"
+                        @click="$router.push(basePath)"
                     >
-                        <v-img alt="NOVA Logo" src="/logo_bw.png" width="200" />
+                        <v-img :src="`${basePath}logo_bw.png`" alt="NOVA Logo" width="200" />
                     </v-app-bar-title>
 
                     <InfoPanel />
@@ -20,7 +20,11 @@
                     >
                         <v-tooltip activator="parent">{{ galaxyAlias }}</v-tooltip>
 
-                        <v-img alt="Galaxy Square Logo" src="/galaxy_icon.png" width="20" />
+                        <v-img
+                            :src="`${basePath}galaxy_icon.png`"
+                            alt="Galaxy Square Logo"
+                            width="20"
+                        />
                     </a>
                 </div>
 
@@ -50,41 +54,10 @@
                     <ActiveToolsPanel class="mr-4" />
 
                     <span v-if="is_logged_in" class="pr-2 text-button">
-                        Welcome, {{ given_name }}
+                        {{ email }}
                     </span>
-                    <v-btn v-else-if="!route.path.startsWith('/launch')">
-                        Sign In
-
-                        <v-menu activator="parent">
-                            <v-list>
-                                <v-list-item v-for="provider in auth_urls" :href="provider.url">
-                                    <v-icon>mdi-open-in-new</v-icon>
-                                    via {{ provider.name }}
-                                </v-list-item>
-
-                                <v-list-subheader>
-                                    <v-icon>mdi-information</v-icon>
-                                    Note on Authentication
-
-                                    <v-menu activator="parent" open-on-hover>
-                                        <v-card class="pa-4" width="400">
-                                            <v-card-title>Note on Authentication</v-card-title>
-                                            <v-card-text>
-                                                When logging into this dashboard, you will be
-                                                simultaneously logged into the
-                                                {{ galaxyAlias }} instance at
-                                                <a :href="galaxyUrl" target="_blank">
-                                                    {{ galaxyUrl }}
-                                                </a>
-                                                as this dashboard relies on it to function. Because
-                                                of this, you may be prompted to login or confirm
-                                                permissions with the authentication provider twice.
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
-                                </v-list-subheader>
-                            </v-list>
-                        </v-menu>
+                    <v-btn v-else-if="!route.path.startsWith('/launch')" :href="loginUrl">
+                        Login
                     </v-btn>
 
                     <v-btn v-if="is_logged_in" icon>
@@ -116,8 +89,8 @@
 
                         <v-menu activator="parent">
                             <v-list>
-                                <v-list-item prepend-icon="mdi-logout" @click="logout">
-                                    Logout
+                                <v-list-item prepend-icon="mdi-logout" href="/user">
+                                    Logout via {{ galaxyAlias }}
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -182,29 +155,11 @@
                     © {{ new Date().getFullYear() }} ORNL
                 </a>
             </v-footer>
-
-            <v-dialog v-model="user.requires_galaxy_login" persistent width="400">
-                <v-card class="text-center">
-                    <v-card-text>
-                        <p class="mb-4">
-                            You need to login to {{ galaxyAlias }} to be able to launch tools.
-                            Please go to
-                            <a target="_blank" :href="galaxyUrl">{{ galaxyUrl }}</a> and log into
-                            {{ galaxyAlias }} using your {{ user.login_type }} credentials.
-                        </p>
-                        <p>
-                            If you've already logged in, then you can refresh this page to dismiss
-                            this dialog.
-                        </p>
-                    </v-card-text>
-                </v-card>
-            </v-dialog>
         </v-main>
     </v-app>
 </template>
 
 <script setup>
-import Cookies from "js-cookie"
 import { computed, onMounted, ref } from "vue"
 import { storeToRefs } from "pinia"
 import { RouterView, useRoute } from "vue-router"
@@ -221,16 +176,20 @@ import StatusPanel from "@/components/StatusPanel.vue"
 const job = useJobStore()
 const { running } = storeToRefs(job)
 const user = useUserStore()
-const { autoopen, given_name, is_admin, is_logged_in, auth_urls } = storeToRefs(user)
+const { autoopen, email, is_admin, is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const drawer = ref(false)
 const notificationPanel = ref(null)
+const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
+const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyDocsUrl = import.meta.env.VITE_GALAXY_DOCS_URL
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
 const novaAlias = import.meta.env.VITE_NOVA_ALIAS
 const novaDocsUrl = import.meta.env.VITE_NOVA_DOCS_URL
 const novaTutorialUrl = import.meta.env.VITE_NOVA_TUTORIAL_URL
+
+const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
 
 const genericTools = computed(() => {
     const tools = getTools()
@@ -244,19 +203,10 @@ const genericTools = computed(() => {
 
 onMounted(async () => {
     await user.getUser()
-
-    if (user.is_logged_in) {
-        await user.userStatus()
-    }
 })
 
 function toggleDrawer() {
     drawer.value = !drawer.value
-}
-
-function logout() {
-    Cookies.remove("csrftoken")
-    window.location.replace("/logout/")
 }
 </script>
 

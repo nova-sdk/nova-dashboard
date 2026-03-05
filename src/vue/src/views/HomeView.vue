@@ -23,7 +23,7 @@
                             lg="4"
                         >
                             <v-card
-                                :to="`/${key}`"
+                                :to="`${basePath}${key}`"
                                 class="d-flex fill-height flex-column justify-center"
                             >
                                 <v-card-item>
@@ -57,6 +57,7 @@ const router = useRouter()
 const job = useJobStore()
 const user = useUserStore()
 
+const basePath = import.meta.env.VITE_BASE_PATH
 const dashboardTitle = import.meta.env.VITE_DASHBOARD_TITLE
 
 const availableTechniques = computed(() => {
@@ -72,22 +73,6 @@ const availableTechniques = computed(() => {
 })
 
 onMounted(async () => {
-    if (user.is_logged_in) {
-        job.startMonitor(false, null, false)
-
-        const lastpath = window.localStorage.getItem("lastpath")
-        const redirect = window.localStorage.getItem("redirect")
-
-        if (lastpath !== null && redirect === "true") {
-            // The user has just logged in, so we need to redirect them to the last page they were on.
-            window.localStorage.removeItem("lastpath")
-            window.localStorage.removeItem("redirect")
-
-            router.push(lastpath)
-        }
-    } else {
-        window.localStorage.removeItem("lastpath")
-        window.localStorage.setItem("redirect", true)
-    }
+    job.startMonitor(false, null, false)
 })
 </script>

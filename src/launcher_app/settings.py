@@ -26,11 +26,13 @@ REFRESH_TOKEN_KEY = os.environ["REFRESH_TOKEN_KEY"].encode()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ["DEBUG"] != "false"
 
-ALLOWED_HOSTS = ["localhost", "nova.ornl.gov", "nova-test.ornl.gov"]
+ALLOWED_HOSTS = ["localhost", "nova.ornl.gov", "nova-test.ornl.gov", "ndip.ornl.gov", "ndip-test.ornl.gov"]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "https://nova.ornl.gov",
     "https://nova-test.ornl.gov",
+    "https://ndip.ornl.gov",
+    "https://ndip-test.ornl.gov",
 ]
 
 # Application definition
@@ -86,9 +88,6 @@ DATABASES = {
     }
 }
 
-# List of emails that can edit the system notification
-NOVA_ADMINS = json.loads(os.environ.get("ADMINISTRATOR_EMAILS", "[]"))
-
 # Prefix of tools to retrieve from Galaxy
 TOOL_PREFIX = os.environ.get("TOOL_PREFIX", "nova")
 # Tool ID that will always fail for testing error states.
@@ -115,25 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Authentication timeout
 SESSION_COOKIE_AGE = int(os.environ.get("SESSION_COOKIE_AGE", 60 * 60 * 24 * 14))  # 2 weeks
 
-# OAuth settings
-BASE_URL = os.environ["BASE_URL"]
-OAUTH_PROVIDERS = {}
-for provider_id in os.environ["OAUTH_PROVIDERS"].split():
-    env_prefix = provider_id.upper()
-    OAUTH_PROVIDERS[provider_id] = {
-        "name": os.environ.get(f"{env_prefix}_NAME"),
-        "auth_url": os.environ.get(f"{env_prefix}_AUTH_URL"),
-        "token_url": os.environ.get(f"{env_prefix}_TOKEN_URL"),
-        "client_id": os.environ.get(f"{env_prefix}_CLIENT_ID"),
-        "client_secret": os.environ.get(f"{env_prefix}_CLIENT_SECRET"),
-        "redirect_path": os.environ.get(f"{env_prefix}_REDIRECT_PATH"),
-        "scopes": os.environ.get(f"{env_prefix}_SCOPES"),
-        "login_url": os.environ.get(f"{env_prefix}_LOGIN_URL"),
-    }
-
 # Galaxy settings
 GALAXY_URL = os.environ["GALAXY_URL"]
-GALAXY_API_KEY_ENDPOINT = os.environ["GALAXY_API_KEY_ENDPOINT"]
 GALAXY_HISTORY_NAME = os.environ.get("GALAXY_HISTORY_NAME", "launcher_history")
 
 # System status settings

@@ -13,11 +13,7 @@
                 <div v-if="!is_logged_in">
                     <p class="mb-2">You must log in before your tool can be launched.</p>
 
-                    <div>
-                        <v-btn v-for="provider in auth_urls" :href="provider.url" class="mx-1">
-                            {{ provider.name }}
-                        </v-btn>
-                    </div>
+                    <v-btn :href="loginUrl">Login</v-btn>
                 </div>
                 <div v-else>
                     <ToolStatus
@@ -32,7 +28,7 @@
 
 <script setup>
 import { storeToRefs } from "pinia"
-import { onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import ToolStatus from "@/components/ToolStatus.vue"
@@ -46,15 +42,14 @@ const props = defineProps({
     }
 })
 
-const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
-
 const job = useJobStore()
-const { all_jobs, jobs } = storeToRefs(job)
+const { all_jobs, has_monitored } = storeToRefs(job)
 const user = useUserStore()
-const { checking_galaxy_login, is_logged_in, auth_urls } = storeToRefs(user)
+const { is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const router = useRouter()
 
+const delay = 2000
 const targetJob = ref(null)
 const targetTool = ref(null)
 let inputs = {}
@@ -62,8 +57,14 @@ let hasInputs = false
 let launched = false
 let targetJobId = null
 
+const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
+const basePath = import.meta.env.VITE_BASE_PATH
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
+
+const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
+
 async function monitorCallback() {
-    if (!is_logged_in || checking_galaxy_login.value || targetTool.value === null) {
+    if (!has_monitored.value || !is_logged_in.value || targetTool.value === null) {
         return
     }
 
@@ -124,7 +125,12 @@ onMounted(async () => {
         })
     }
 
-    if (hasInputs && user.is_logged_in) {
+    if (hasInputs) {
+        while (user.apiKey === "") {
+            // Sleep until the user's API key is ready since we are going to launch immediately.
+            await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+
         targetJobId = await job.launchJob(targetTool.value.id, inputs)
         if (targetJobId === null) {
             // The tool failed to launch. launchJob will take care of error handling,
@@ -136,9 +142,5 @@ onMounted(async () => {
     }
 
     job.startMonitor(false, monitorCallback, true)
-    if (!user.is_logged_in) {
-        window.localStorage.setItem("lastpath", route.fullPath)
-        window.localStorage.setItem("redirect", true)
-    }
 })
 </script>

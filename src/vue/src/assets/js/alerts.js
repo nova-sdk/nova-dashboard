@@ -1,3 +1,5 @@
+const basePath = import.meta.env.VITE_BASE_PATH
+
 // Tracks the status of an individual alert alias.
 class Alias {
     constructor(name) {
@@ -133,12 +135,11 @@ class Service {
 // API class, this is responsible for interacting with the alert monitoring endpoint and triggering relevant state updates.
 export default class AlertManager {
     constructor() {
-        this.alertsUrl = "/api/status/alerts/"
-        this.targetsUrl = "/api/status/targets/"
+        this.alertsUrl = `${basePath}api/status/alerts/`
+        this.targetsUrl = `${basePath}api/status/targets/`
 
         this.alerts = []
         this.services = null
-        this.monitoringUrl = ""
     }
 
     reset() {
@@ -192,7 +193,6 @@ export default class AlertManager {
 
         const response = await fetch(this.alertsUrl)
         const data = await response.json()
-        this.monitoringUrl = data?.url
 
         this.reset()
 

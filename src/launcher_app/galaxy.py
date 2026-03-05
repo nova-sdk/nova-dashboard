@@ -1,8 +1,6 @@
 """Defines a class for interacting with a specified Galaxy server.
 
 The server to connect to can be controlled via the GALAXY_URL setting.
-The endpoint on the server through which to get a user's API key can be
-controlled via the GALAXY_API_KEY_ENDPOINT setting.
 The history name to use for all jobs can be controlled via the
 GALAXY_HISTORY_NAME setting.
 """
@@ -16,8 +14,6 @@ from django.conf import settings
 from nova.galaxy import Connection, Parameters, Tool
 from requests import get as requests_get
 from requests.exceptions import Timeout
-
-from .auth import AuthManager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -39,24 +35,15 @@ class ToolDict(TypedDict):
 
 
 class GalaxyManager:
-    """Manages and monitors Galaxy jobs.
+    """Manages and monitors Galaxy jobs."""
 
-    auth_manager is an instance of AuthManager that will be used to
-    authenticate with Galaxy to get the user's API key.
-    """
-
-    def __init__(self, auth_manager: Optional[AuthManager] = None):
+    def __init__(self, api_key: str):
         """Init."""
-        if auth_manager is not None:
-            self.auth_manager = auth_manager
-            self.connection = Connection(settings.GALAXY_URL, self.auth_manager.get_galaxy_api_key())
-            with self.connection.connect() as connection:
-                connection.create_data_store(name=settings.GALAXY_HISTORY_NAME)
+        if api_key:
+            self.connection = Connection(settings.GALAXY_URL, api_key)
 
     def _handle_galaxy_failure(self, exception: Exception) -> None:
         logger.error(f"Failed to connect to Galaxy: {exception}")
-
-        self.auth_manager.delete_galaxy_api_key()
 
         raise Exception(f"Failed to connect to Galaxy: {exception}") from None
 
@@ -141,7 +128,7 @@ class GalaxyManager:
         return ordered_json
 
     def ingest_file(self, connection: Connection, file_path: str) -> Optional[str]:
-        file_store = connection.create_data_store(name=f"{settings.GALAXY_HISTORY_NAME}_data")
+        file_store = connection.get_data_store(name=f"{settings.GALAXY_HISTORY_NAME}_data")
         load_data = Tool("neutrons_register")
         load_params = Parameters()
         load_params.add_input("series_0|input", file_path)
@@ -152,12 +139,19 @@ class GalaxyManager:
         except Exception:
             return None
 
+    def is_admin(self) -> bool:
+        try:
+            with self.connection.connect() as connection:
+                return connection.galaxy_instance.users.get_current_user()["is_admin"]
+        except Exception:
+            return False
+
     def launch_job(self, tool_id: str, inputs: dict[str, str]) -> str:
         with self.connection.connect() as connection:
             if inputs:
-                store = connection.create_data_store(name=f"{settings.GALAXY_HISTORY_NAME}_datafile_tools")
+                store = connection.get_data_store(name=f"{settings.GALAXY_HISTORY_NAME}_datafile_tools")
             else:
-                store = connection.create_data_store(name=settings.GALAXY_HISTORY_NAME)
+                store = connection.get_data_store(name=settings.GALAXY_HISTORY_NAME)
 
             tool = Tool(tool_id)
 
@@ -193,10 +187,8 @@ class GalaxyManager:
         status_list = []
         try:
             with self.connection.connect() as connection:
-                store = connection.create_data_store(name=settings.GALAXY_HISTORY_NAME)
-                datafile_tools_store = connection.create_data_store(
-                    name=f"{settings.GALAXY_HISTORY_NAME}_datafile_tools"
-                )
+                store = connection.get_data_store(name=settings.GALAXY_HISTORY_NAME)
+                datafile_tools_store = connection.get_data_store(name=f"{settings.GALAXY_HISTORY_NAME}_datafile_tools")
 
                 jobs = connection.galaxy_instance.jobs.get_jobs(history_id=store.history_id, state=NONTERMINAL_STATES)
                 datafile_jobs = connection.galaxy_instance.jobs.get_jobs(
@@ -279,7 +271,7 @@ class GalaxyManager:
 
     def stop_job(self, tool_uid: str) -> None:
         with self.connection.connect() as connection:
-            store = connection.create_data_store(name=settings.GALAXY_HISTORY_NAME)
+            store = connection.get_data_store(name=settings.GALAXY_HISTORY_NAME)
             tool = Tool("")
             tool.assign_id(new_id=tool_uid, data_store=store)
             tool.cancel()

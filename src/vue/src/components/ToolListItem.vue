@@ -105,6 +105,8 @@ const user = useUserStore()
 const { is_logged_in } = storeToRefs(user)
 const linkCopied = ref(false)
 
+const basePath = import.meta.env.VITE_BASE_PATH
+
 function canLaunch(jobs, tool_id) {
     return !["submitting", "new", "queued", "running", "ready", "stopping"].includes(
         jobs[tool_id]?.state
@@ -140,7 +142,7 @@ function parseParams(parameters) {
 }
 
 function getAutolaunchURL(tool_id) {
-    return window.location.origin + `/launch/${tool_id}`
+    return window.location.origin + `${basePath}launch/${tool_id}`
 }
 
 function setClipboard(text) {

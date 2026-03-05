@@ -4,6 +4,7 @@ import { nextTick } from "vue"
 
 import { useUserStore } from "@/stores/user"
 
+const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
 
@@ -67,6 +68,11 @@ export const useJobStore = defineStore("job", {
 
             this.galaxy_error = message
         },
+        async galaxyFetch(endpoint, options) {
+            await this.user.getUserId()
+
+            return await fetch(`${basePath}${endpoint}`, options)
+        },
         async launchJob(tool_id, inputs) {
             this.jobs[tool_id] = {
                 id: "",
@@ -78,19 +84,19 @@ export const useJobStore = defineStore("job", {
             }
             this.updateCalveraSpinner()
 
-            await this.user.userStatus()
             if (this.requires_galaxy_login) {
                 this.jobs[tool_id].state = "stopped"
                 return
             }
 
-            const response = await fetch("/api/galaxy/launch/", {
+            const response = await this.galaxyFetch("api/galaxy/launch/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": Cookies.get("csrftoken")
                 },
                 body: JSON.stringify({
+                    api_key: this.user.apiKey,
                     tool_id: tool_id,
                     inputs: inputs
                 })
@@ -116,13 +122,14 @@ export const useJobStore = defineStore("job", {
                 this.updateCalveraSpinner()
             }
 
-            const response = await fetch("/api/galaxy/stop/", {
+            const response = await this.galaxyFetch("api/galaxy/stop/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": Cookies.get("csrftoken")
                 },
                 body: JSON.stringify({
+                    api_key: this.user.apiKey,
                     job_id: job_id
                 })
             })
@@ -136,17 +143,24 @@ export const useJobStore = defineStore("job", {
             }
         },
         async monitorJobs() {
+            if (this.user.apiKey === "") {
+                return
+            }
+
             const job_ids = {}
             for (const j in this.jobs) {
                 job_ids[j] = this.jobs[j].id
             }
-            const response = await fetch("/api/galaxy/monitor/", {
+            const response = await this.galaxyFetch("api/galaxy/monitor/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": Cookies.get("csrftoken")
                 },
-                body: JSON.stringify({ tool_ids: job_ids })
+                body: JSON.stringify({
+                    api_key: this.user.apiKey,
+                    tool_ids: job_ids
+                })
             })
 
             if (response.status === 200) {
