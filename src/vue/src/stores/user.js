@@ -34,6 +34,10 @@ export const useUserStore = defineStore("user", {
             this.is_admin = adminData.is_admin
         },
         async getApiKey() {
+            if (this.id === "") {
+                return
+            }
+
             const apiKeyResponse = await fetch(`/api/users/${this.id}/api_key/detailed`)
             const apiKeyData = await apiKeyResponse.json()
             this.apiKey = apiKeyData.key

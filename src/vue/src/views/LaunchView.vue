@@ -58,9 +58,10 @@ let launched = false
 let targetJobId = null
 
 const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
+const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 
-const loginUrl = computed(() => baseLoginUrl + route.fullPath)
+const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
 
 async function monitorCallback() {
     if (!has_monitored.value || !is_logged_in.value || targetTool.value === null) {

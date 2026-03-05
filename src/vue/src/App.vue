@@ -189,7 +189,7 @@ const novaAlias = import.meta.env.VITE_NOVA_ALIAS
 const novaDocsUrl = import.meta.env.VITE_NOVA_DOCS_URL
 const novaTutorialUrl = import.meta.env.VITE_NOVA_TUTORIAL_URL
 
-const loginUrl = computed(() => baseLoginUrl + route.fullPath)
+const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
 
 const genericTools = computed(() => {
     const tools = getTools()
