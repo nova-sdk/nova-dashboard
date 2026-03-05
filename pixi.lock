@@ -87,7 +87,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/88/b2/d0896bdcdc8d28a7fc5717c305f1a861c26e18c05047949fb371034d98bd/nodeenv-1.10.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ff/0e/8e938edc6996b0b438bfb5a70eb39a4d6094380db9c66c6ebbf1bc1a18fa/nova_common-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3a/e4/920714ccc00cece0725dd98f6daf3b03b7c9504db00b10d27e62e490b64c/nova_galaxy-0.11.6-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/da/52d60f3eeae1154ee09977b75f8bb04745643e4fb67ef8e84efc743a8015/nova_mvvm-0.16.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/fa/d6/95c9c7c2380de808773b48872859ee507b4fbe02ffcbfc4725c329982ad8/nova_mvvm-0.16.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/08/2c/87b3685c255eb18860ce642edea72e4fbf7d5972e7b7315b476df71ceaf4/nova_trame-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/04/dc/46066ce18d01645541f0186877377b9371b8fa8017fa8262002b4ef22612/numpy-2.4.2-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl
@@ -125,7 +125,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/50/d4/e51d52047e7eb9a582da59f32125d17c0482d065afd5d3bc435ff2120dc5/tornado-6.5.4-cp39-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/70/15/5869b2c7556fce52306b6b65b06ec7c088f063b865cdfa75ad30bc229b7c/trame-3.12.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/97/cd/30dc4e9ebd1b1482eed33d5bd47cf188c136344d1e7265741dc0908a32bb/trame_client-3.11.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/f4/69/daf207ff13168c454b984e3d90cbb5765cf3db43243bf6d69eae5c749ca1/trame_common-1.1.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/58/2c/b06a6eb40e9c08eed7666fa627c11d307b91b51d464641ba2788d38af1e4/trame_common-1.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/41/50/e76c48f9c40eeebf211e89dc25808807ab913c6e00ffb8e93f5a5b5889c9/trame_datagrid-0.2.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/91/bf/0a75fece4d89f21913615efac209f82cc13db80a7e2537c127a742aaf046/trame_matplotlib-2.0.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bb/4c/3fa48d9fd8ba6795b56d39426d9f06d130ba4a51de46df424dd9db79c744/trame_plotly-3.1.0-py3-none-any.whl
@@ -141,7 +141,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/78/55/896b06bf93a49bec0f4ae2a6f1ed12bd05c8860744ac3a70eda041064e4d/virtualenv-21.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4d/ec/d58832f89ede95652fd01f4f24236af7d32b70cab2196dfcc2d2fd13c5c2/werkzeug-3.1.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/2f/60c51304fbdf47ce992d9eefa61fbd2c0e64feee60aaa439baf42ea6f40b/wrapt-2.1.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/94/03/a36a6ea6994c6f7a9c05c5351361fb848204988c814cddd1c471400eb21e/wslink-2.5.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/66/fe/b1e10b08d287f518994f1e2ff9b6d26f0adeecd8dd7d533b01bab29a3eda/yarl-1.23.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: ./
       osx-64:
@@ -212,7 +212,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/88/b2/d0896bdcdc8d28a7fc5717c305f1a861c26e18c05047949fb371034d98bd/nodeenv-1.10.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ff/0e/8e938edc6996b0b438bfb5a70eb39a4d6094380db9c66c6ebbf1bc1a18fa/nova_common-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3a/e4/920714ccc00cece0725dd98f6daf3b03b7c9504db00b10d27e62e490b64c/nova_galaxy-0.11.6-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/da/52d60f3eeae1154ee09977b75f8bb04745643e4fb67ef8e84efc743a8015/nova_mvvm-0.16.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/fa/d6/95c9c7c2380de808773b48872859ee507b4fbe02ffcbfc4725c329982ad8/nova_mvvm-0.16.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/08/2c/87b3685c255eb18860ce642edea72e4fbf7d5972e7b7315b476df71ceaf4/nova_trame-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/a1/22/815b9fe25d1d7ae7d492152adbc7226d3eff731dffc38fe970589fcaaa38/numpy-2.4.2-cp313-cp313-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl
@@ -250,7 +250,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/db/7e/f7b8d8c4453f305a51f80dbb49014257bb7d28ccb4bbb8dd328ea995ecad/tornado-6.5.4-cp39-abi3-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/70/15/5869b2c7556fce52306b6b65b06ec7c088f063b865cdfa75ad30bc229b7c/trame-3.12.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/97/cd/30dc4e9ebd1b1482eed33d5bd47cf188c136344d1e7265741dc0908a32bb/trame_client-3.11.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/f4/69/daf207ff13168c454b984e3d90cbb5765cf3db43243bf6d69eae5c749ca1/trame_common-1.1.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/58/2c/b06a6eb40e9c08eed7666fa627c11d307b91b51d464641ba2788d38af1e4/trame_common-1.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/41/50/e76c48f9c40eeebf211e89dc25808807ab913c6e00ffb8e93f5a5b5889c9/trame_datagrid-0.2.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/91/bf/0a75fece4d89f21913615efac209f82cc13db80a7e2537c127a742aaf046/trame_matplotlib-2.0.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bb/4c/3fa48d9fd8ba6795b56d39426d9f06d130ba4a51de46df424dd9db79c744/trame_plotly-3.1.0-py3-none-any.whl
@@ -266,7 +266,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/78/55/896b06bf93a49bec0f4ae2a6f1ed12bd05c8860744ac3a70eda041064e4d/virtualenv-21.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4d/ec/d58832f89ede95652fd01f4f24236af7d32b70cab2196dfcc2d2fd13c5c2/werkzeug-3.1.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f7/ca/3cf290212855b19af9fcc41b725b5620b32f470d6aad970c2593500817eb/wrapt-2.1.1-cp313-cp313-macosx_10_13_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/94/03/a36a6ea6994c6f7a9c05c5351361fb848204988c814cddd1c471400eb21e/wslink-2.5.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/67/b6/8925d68af039b835ae876db5838e82e76ec87b9782ecc97e192b809c4831/yarl-1.23.0-cp313-cp313-macosx_10_13_x86_64.whl
       - pypi: ./
   production:
@@ -346,7 +346,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ef/82/7a9d0550484a62c6da82858ee9419f3dd1ccc9aa1c26a1e43da3ecd20b0d/natsort-8.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ff/0e/8e938edc6996b0b438bfb5a70eb39a4d6094380db9c66c6ebbf1bc1a18fa/nova_common-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3a/e4/920714ccc00cece0725dd98f6daf3b03b7c9504db00b10d27e62e490b64c/nova_galaxy-0.11.6-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/da/52d60f3eeae1154ee09977b75f8bb04745643e4fb67ef8e84efc743a8015/nova_mvvm-0.16.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/fa/d6/95c9c7c2380de808773b48872859ee507b4fbe02ffcbfc4725c329982ad8/nova_mvvm-0.16.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/08/2c/87b3685c255eb18860ce642edea72e4fbf7d5972e7b7315b476df71ceaf4/nova_trame-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/04/dc/46066ce18d01645541f0186877377b9371b8fa8017fa8262002b4ef22612/numpy-2.4.2-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl
@@ -376,7 +376,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/50/d4/e51d52047e7eb9a582da59f32125d17c0482d065afd5d3bc435ff2120dc5/tornado-6.5.4-cp39-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/70/15/5869b2c7556fce52306b6b65b06ec7c088f063b865cdfa75ad30bc229b7c/trame-3.12.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/97/cd/30dc4e9ebd1b1482eed33d5bd47cf188c136344d1e7265741dc0908a32bb/trame_client-3.11.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/f4/69/daf207ff13168c454b984e3d90cbb5765cf3db43243bf6d69eae5c749ca1/trame_common-1.1.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/58/2c/b06a6eb40e9c08eed7666fa627c11d307b91b51d464641ba2788d38af1e4/trame_common-1.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/41/50/e76c48f9c40eeebf211e89dc25808807ab913c6e00ffb8e93f5a5b5889c9/trame_datagrid-0.2.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/91/bf/0a75fece4d89f21913615efac209f82cc13db80a7e2537c127a742aaf046/trame_matplotlib-2.0.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bb/4c/3fa48d9fd8ba6795b56d39426d9f06d130ba4a51de46df424dd9db79c744/trame_plotly-3.1.0-py3-none-any.whl
@@ -389,7 +389,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1e/2f/60c51304fbdf47ce992d9eefa61fbd2c0e64feee60aaa439baf42ea6f40b/wrapt-2.1.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/94/03/a36a6ea6994c6f7a9c05c5351361fb848204988c814cddd1c471400eb21e/wslink-2.5.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/66/fe/b1e10b08d287f518994f1e2ff9b6d26f0adeecd8dd7d533b01bab29a3eda/yarl-1.23.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: ./
       osx-64:
@@ -450,7 +450,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ef/82/7a9d0550484a62c6da82858ee9419f3dd1ccc9aa1c26a1e43da3ecd20b0d/natsort-8.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ff/0e/8e938edc6996b0b438bfb5a70eb39a4d6094380db9c66c6ebbf1bc1a18fa/nova_common-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3a/e4/920714ccc00cece0725dd98f6daf3b03b7c9504db00b10d27e62e490b64c/nova_galaxy-0.11.6-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/a5/da/52d60f3eeae1154ee09977b75f8bb04745643e4fb67ef8e84efc743a8015/nova_mvvm-0.16.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/fa/d6/95c9c7c2380de808773b48872859ee507b4fbe02ffcbfc4725c329982ad8/nova_mvvm-0.16.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/08/2c/87b3685c255eb18860ce642edea72e4fbf7d5972e7b7315b476df71ceaf4/nova_trame-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/a1/22/815b9fe25d1d7ae7d492152adbc7226d3eff731dffc38fe970589fcaaa38/numpy-2.4.2-cp313-cp313-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl
@@ -480,7 +480,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/db/7e/f7b8d8c4453f305a51f80dbb49014257bb7d28ccb4bbb8dd328ea995ecad/tornado-6.5.4-cp39-abi3-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/70/15/5869b2c7556fce52306b6b65b06ec7c088f063b865cdfa75ad30bc229b7c/trame-3.12.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/97/cd/30dc4e9ebd1b1482eed33d5bd47cf188c136344d1e7265741dc0908a32bb/trame_client-3.11.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/f4/69/daf207ff13168c454b984e3d90cbb5765cf3db43243bf6d69eae5c749ca1/trame_common-1.1.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/58/2c/b06a6eb40e9c08eed7666fa627c11d307b91b51d464641ba2788d38af1e4/trame_common-1.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/41/50/e76c48f9c40eeebf211e89dc25808807ab913c6e00ffb8e93f5a5b5889c9/trame_datagrid-0.2.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/91/bf/0a75fece4d89f21913615efac209f82cc13db80a7e2537c127a742aaf046/trame_matplotlib-2.0.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bb/4c/3fa48d9fd8ba6795b56d39426d9f06d130ba4a51de46df424dd9db79c744/trame_plotly-3.1.0-py3-none-any.whl
@@ -493,7 +493,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f7/ca/3cf290212855b19af9fcc41b725b5620b32f470d6aad970c2593500817eb/wrapt-2.1.1-cp313-cp313-macosx_10_13_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/94/03/a36a6ea6994c6f7a9c05c5351361fb848204988c814cddd1c471400eb21e/wslink-2.5.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/67/b6/8925d68af039b835ae876db5838e82e76ec87b9782ecc97e192b809c4831/yarl-1.23.0-cp313-cp313-macosx_10_13_x86_64.whl
       - pypi: ./
 packages:
@@ -1561,8 +1561,8 @@ packages:
   requires_python: '>=3.10,<4.0'
 - pypi: ./
   name: nova-dashboard
-  version: 0.20.0.dev12
-  sha256: f57a6a2ecc859d2adc87f3be15864f937ce001e43913ac2add6568489464d946
+  version: 0.20.0.dev14
+  sha256: b68d0e678fb0e88b78015d441cc9213e36c76fb31a3ce89965241a181cb41e8b
   requires_python: '>=3.10,<3.14'
 - pypi: https://files.pythonhosted.org/packages/3a/e4/920714ccc00cece0725dd98f6daf3b03b7c9504db00b10d27e62e490b64c/nova_galaxy-0.11.6-py3-none-any.whl
   name: nova-galaxy
@@ -1575,10 +1575,10 @@ packages:
   - nova-common>=0.2.0
   - tomli>=2.0.2
   requires_python: '>=3.10,<3.14'
-- pypi: https://files.pythonhosted.org/packages/a5/da/52d60f3eeae1154ee09977b75f8bb04745643e4fb67ef8e84efc743a8015/nova_mvvm-0.16.2-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/fa/d6/95c9c7c2380de808773b48872859ee507b4fbe02ffcbfc4725c329982ad8/nova_mvvm-0.16.3-py3-none-any.whl
   name: nova-mvvm
-  version: 0.16.2
-  sha256: 0097a87ee26d76ae29b014f904966c4f744423800f2f244aa6bd405d33ce21bd
+  version: 0.16.3
+  sha256: 1e0901fa4b03a66a2be23b10a5909ed1f72fb018755ccb3d285c97de821a3165
   requires_dist:
   - deepdiff
   - pydantic
@@ -2193,10 +2193,10 @@ packages:
   - pre-commit ; extra == 'dev'
   - ruff ; extra == 'dev'
   requires_python: '>=3.9'
-- pypi: https://files.pythonhosted.org/packages/f4/69/daf207ff13168c454b984e3d90cbb5765cf3db43243bf6d69eae5c749ca1/trame_common-1.1.1-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/58/2c/b06a6eb40e9c08eed7666fa627c11d307b91b51d464641ba2788d38af1e4/trame_common-1.1.2-py3-none-any.whl
   name: trame-common
-  version: 1.1.1
-  sha256: 6fb7d0c2488b0ef4728774be5f982116a599ef3c088d82678b1c29c7648a9a6d
+  version: 1.1.2
+  sha256: dec0ed549dcc14608eb83a9dd2b350c07f14e7d02511bd6e203bc5fec3e8c926
   requires_dist:
   - nox ; extra == 'dev'
   - pre-commit ; extra == 'dev'
@@ -2353,10 +2353,10 @@ packages:
   - pytest ; extra == 'dev'
   - setuptools ; extra == 'dev'
   requires_python: '>=3.9'
-- pypi: https://files.pythonhosted.org/packages/a4/db/8cc43cbd6fb52dbee65115b6789701bd64a57ed7c6384242455c017f64b3/wslink-2.5.3-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/94/03/a36a6ea6994c6f7a9c05c5351361fb848204988c814cddd1c471400eb21e/wslink-2.5.5-py3-none-any.whl
   name: wslink
-  version: 2.5.3
-  sha256: c6f16f2f9505204cd16e1a076533c262362a059bd545b9ae36c1d6f67e5ae54b
+  version: 2.5.5
+  sha256: 02a783c1a0c0799b89bd5cbb486722474e1c71c80655a5fe0523c2c76cc84e34
   requires_dist:
   - aiohttp<4
   - msgpack>=1,<2

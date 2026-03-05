@@ -45,8 +45,13 @@ export const useUserStore = defineStore("user", {
                 return
             }
 
-            const userResponse = await fetch("/api/whoami")
-            const userData = await userResponse.json()
+            let userData
+            try {
+                const userResponse = await fetch("/api/whoami")
+                userData = await userResponse.json()
+            } catch {
+                userData = null
+            }
             if (userData === null) {
                 // User is not logged in.
                 if (this.id !== "") {

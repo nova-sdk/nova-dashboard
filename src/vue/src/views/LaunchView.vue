@@ -28,7 +28,7 @@
 
 <script setup>
 import { storeToRefs } from "pinia"
-import { onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import ToolStatus from "@/components/ToolStatus.vue"
@@ -41,9 +41,6 @@ const props = defineProps({
         type: Object
     }
 })
-
-const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
-const loginUrl = import.meta.env.VITE_LOGIN_URL
 
 const job = useJobStore()
 const { all_jobs, has_monitored } = storeToRefs(job)
@@ -59,6 +56,11 @@ let inputs = {}
 let hasInputs = false
 let launched = false
 let targetJobId = null
+
+const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
+
+const loginUrl = computed(() => baseLoginUrl + route.fullPath)
 
 async function monitorCallback() {
     if (!has_monitored.value || !is_logged_in.value || targetTool.value === null) {
@@ -122,8 +124,11 @@ onMounted(async () => {
         })
     }
 
-    if (hasInputs && user.is_logged_in) {
-        await user.getApiKey()
+    if (hasInputs) {
+        while (user.apiKey === "") {
+            // Sleep until the user's API key is ready since we are going to launch immediately.
+            await new Promise((resolve) => setTimeout(resolve, delay))
+        }
 
         targetJobId = await job.launchJob(targetTool.value.id, inputs)
         if (targetJobId === null) {
@@ -133,18 +138,8 @@ onMounted(async () => {
         }
 
         launched = true
-    } else if (hasInputs) {
-        while (user.id === "") {
-            await user.getUser()
-            // Sleep
-            await new Promise((resolve) => setTimeout(resolve, delay))
-        }
     }
 
     job.startMonitor(false, monitorCallback, true)
-    if (!user.is_logged_in) {
-        window.localStorage.setItem("lastpath", route.fullPath)
-        window.localStorage.setItem("redirect", true)
-    }
 })
 </script>

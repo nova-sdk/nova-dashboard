@@ -160,7 +160,6 @@
 </template>
 
 <script setup>
-import Cookies from "js-cookie"
 import { computed, onMounted, ref } from "vue"
 import { storeToRefs } from "pinia"
 import { RouterView, useRoute } from "vue-router"
@@ -181,14 +180,16 @@ const { autoopen, email, is_admin, is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const drawer = ref(false)
 const notificationPanel = ref(null)
+const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
 const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyDocsUrl = import.meta.env.VITE_GALAXY_DOCS_URL
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
-const loginUrl = import.meta.env.VITE_LOGIN_URL
 const novaAlias = import.meta.env.VITE_NOVA_ALIAS
 const novaDocsUrl = import.meta.env.VITE_NOVA_DOCS_URL
 const novaTutorialUrl = import.meta.env.VITE_NOVA_TUTORIAL_URL
+
+const loginUrl = computed(() => baseLoginUrl + route.fullPath)
 
 const genericTools = computed(() => {
     const tools = getTools()
