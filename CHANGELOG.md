@@ -1,3 +1,12 @@
+### nova-dashboard, 0.20.1
+
+* Adds a citation request to the header (thanks to Greg Watson and John Duggan).
+
+### nova-dashboard, 0.20.0
+
+* Authentication is now provided directly by Galaxy (thanks to John Duggan).
+* This dashboard is now run as a subdomain of its connected Galaxy instance (thanks to John Duggan).
+
 ### nova-dashboard, 0.19.5
 
 * Fixes delayed responses from the job launch endpoint (thanks to John Duggan).

@@ -15,7 +15,7 @@
                     <NotificationPanel ref="notificationPanel" v-show="is_admin" />
                     <a
                         :href="galaxyUrl"
-                        class="ml-2 text-decoration-none text-white"
+                        class="mx-2 text-decoration-none text-white"
                         target="_blank"
                     >
                         <v-tooltip activator="parent">{{ galaxyAlias }}</v-tooltip>
@@ -26,6 +26,7 @@
                             width="20"
                         />
                     </a>
+                    <CitationPanel />
                 </div>
 
                 <div>
@@ -169,6 +170,7 @@ import ToolDrawer from "@/components/ToolDrawer.vue"
 import { getTools } from "@/router"
 import { useJobStore } from "@/stores/job"
 import { useUserStore } from "@/stores/user"
+import CitationPanel from "@/components/CitationPanel.vue"
 import InfoPanel from "@/components/InfoPanel.vue"
 import NotificationPanel from "@/components/NotificationPanel.vue"
 import StatusPanel from "@/components/StatusPanel.vue"
