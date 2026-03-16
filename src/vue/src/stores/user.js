@@ -13,6 +13,7 @@ export const useUserStore = defineStore("user", {
             delay: 2000,
             email: null,
             id: "",
+            initial_login_failed: false,
             is_admin: false,
             is_logged_in: false,
             ready: false
@@ -62,12 +63,13 @@ export const useUserStore = defineStore("user", {
                     window.location.reload()
                 }
 
+                this.initial_login_failed = true
                 this.ready = true
                 return
             }
             this.email = userData.email
 
-            if (this.id !== "" && this.id !== userData.id) {
+            if (this.initial_login_failed || (this.id !== "" && this.id !== userData.id)) {
                 window.location.reload()
             }
             this.id = userData.id

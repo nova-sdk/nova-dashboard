@@ -82,7 +82,7 @@ onMounted(async () => {
     } else {
         router.replace({
             name: "not-found",
-            params: { catchAll: route.path.substring(1).split("/") }
+            params: { catchAll: route.path.substring(1).split("/").slice(1) }
         })
     }
 
