@@ -1,3 +1,7 @@
+### nova-dashboard, 0.20.3
+
+* Fix redirection to invalid page when underlying Galaxy instance is restarted (thanks to John Duggan).
+
 ### nova-dashboard, 0.20.2
 
 * Using the browser's back button after using a launch URL will not revisit the launch URL (thanks to John Duggan).
