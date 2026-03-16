@@ -1,3 +1,7 @@
+### nova-dashboard, 0.20.2
+
+* Using the browser's back button after using a launch URL will not revisit the launch URL (thanks to John Duggan).
+
 ### nova-dashboard, 0.20.1
 
 * Adds a citation request to the header (thanks to Greg Watson and John Duggan).

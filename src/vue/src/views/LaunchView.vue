@@ -88,7 +88,7 @@ async function monitorCallback() {
             job.static_error = true
             job.galaxy_error = `${galaxyAlias} error: ${targetJob.value?.error ? targetJob.value?.error : "something unexpected has occurred. Please try again."}`
         } else if (targetJob.value?.state === "ready" || targetJob.value?.url_ready) {
-            window.location.href = targetJob.value.url
+            window.location.replace(targetJob.value.url)
         }
     }
 }
