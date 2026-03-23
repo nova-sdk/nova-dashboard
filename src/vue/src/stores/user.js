@@ -39,9 +39,9 @@ export const useUserStore = defineStore("user", {
                 return
             }
 
-            const apiKeyResponse = await fetch(`/api/users/${this.id}/api_key/detailed`)
-            const apiKeyData = await apiKeyResponse.json()
-            this.apiKey = apiKeyData.key
+            const apiKeyResponse = await fetch(`/api/users/${this.id}/api_key`)
+            const apiKey = await apiKeyResponse.text()
+            this.apiKey = apiKey.replace('"', "")
 
             this.getAdmin()
         },
