@@ -1,3 +1,7 @@
+### nova-dashboard, 0.20.4
+
+* Changed the endpoint used to retrieve the Galaxy API key to generate a new key if needed (thanks to John Duggan).
+
 ### nova-dashboard, 0.20.3
 
 * Fix redirection to invalid page when underlying Galaxy instance is restarted (thanks to John Duggan).
