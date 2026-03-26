@@ -53,6 +53,7 @@
 
                 <div class="app-bar-corner app-bar-end">
                     <ActiveToolsPanel class="mr-4" />
+                    <BugPanel ref="bugPanel" class="mr-4" />
 
                     <span v-if="is_logged_in" class="pr-2 text-button">
                         {{ email }}
@@ -166,6 +167,7 @@ import { storeToRefs } from "pinia"
 import { RouterView, useRoute } from "vue-router"
 
 import ActiveToolsPanel from "@/components/ActiveToolsPanel.vue"
+import BugPanel from "@/components/BugPanel.vue"
 import ToolDrawer from "@/components/ToolDrawer.vue"
 import { getTools } from "@/router"
 import { useJobStore } from "@/stores/job"
@@ -180,6 +182,7 @@ const { running } = storeToRefs(job)
 const user = useUserStore()
 const { autoopen, email, is_admin, is_logged_in } = storeToRefs(user)
 const route = useRoute()
+const bugPanel = ref(null)
 const drawer = ref(false)
 const notificationPanel = ref(null)
 const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
@@ -205,6 +208,7 @@ const genericTools = computed(() => {
 
 onMounted(async () => {
     await user.getUser()
+    bugPanel.value.setDefaultEmail()
 })
 
 function toggleDrawer() {

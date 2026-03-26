@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/galaxy/monitor/", views.galaxy_monitor),
     path("api/galaxy/stop/", views.galaxy_stop),
     path("api/galaxy/tools/", views.galaxy_tools),
+    path("api/issue/", views.report_issue),
     path("api/notification/", views.notification),
 ]
 

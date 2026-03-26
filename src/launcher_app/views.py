@@ -17,6 +17,7 @@ from requests import ConnectionError
 from requests import request as proxy_request
 
 from .galaxy import GalaxyManager
+from .issue import IssueManager
 from .notification import NotificationManager
 from .status import StatusManager
 
@@ -110,6 +111,19 @@ def galaxy_tools(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"tools": galaxy_manager.get_tools()})
     except Exception as e:
         return _create_galaxy_error(e, tools={})
+
+
+@require_POST
+def report_issue(request: HttpRequest) -> HttpResponse:
+    issue_manager = IssueManager()
+
+    try:
+        data = json.loads(request.body)
+        url = issue_manager.submit(data)
+    except Exception:
+        return HttpResponseBadRequest("unable to process request")
+
+    return JsonResponse({"url": url})
 
 
 @require_http_methods(["GET", "POST"])

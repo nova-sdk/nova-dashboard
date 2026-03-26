@@ -125,6 +125,10 @@ MONITORING_URL = os.environ.get("MONITORING_URL", "")
 ALERTS_URL = os.environ.get("ALERTS_URL", "")
 TARGETS_URL = os.environ.get("TARGETS_URL", "")
 
+# Issue reporting settings
+GITLAB_ISSUES_API_ENDPOINT = os.environ.get("GITLAB_ISSUES_API_ENDPOINT")
+GITLAB_ACCESS_TOKEN = os.environ.get("GITLAB_ACCESS_TOKEN")
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
