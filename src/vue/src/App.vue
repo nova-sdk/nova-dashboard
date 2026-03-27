@@ -31,7 +31,7 @@
 
                 <div class="app-bar-corner app-bar-end">
                     <ActiveToolsPanel class="mr-4" />
-                    <BugPanel ref="bugPanel" class="mr-4" />
+                    <BugPanel ref="bugPanel" />
                     <HelpPanel />
 
                     <v-btn
