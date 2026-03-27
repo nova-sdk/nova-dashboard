@@ -1,72 +1,61 @@
 <template>
-    <v-btn size="small">
-        Report Issue
+    <v-menu activator="parent" :close-on-content-click="false">
+        <v-card width="600">
+            <v-card-title class="mb-2 px-0">Report Issue</v-card-title>
+            <v-card-text class="pa-0">
+                <p class="mb-4">
+                    You can view existing tickets at
+                    <a :href="ticketUrl" target="_blank">{{ ticketUrl }}</a
+                    >.
+                </p>
 
-        <v-menu activator="parent" :close-on-content-click="false">
-            <v-card width="600">
-                <v-card-title class="mb-2 px-0">Report Issue</v-card-title>
-                <v-card-text class="pa-0">
-                    <p class="mb-4">
-                        You can view existing tickets at
-                        <a :href="ticketUrl" target="_blank">{{ ticketUrl }}</a
-                        >.
-                    </p>
-
-                    <div class="issue-form">
-                        <div class="d-flex flex-row ga-1">
-                            <v-text-field
-                                v-model="email"
-                                :maxlength="textFieldMaxLength"
-                                label="Email Address"
-                            />
-                            <v-text-field
-                                v-model="name"
-                                :maxlength="textFieldMaxLength"
-                                label="Name"
-                            />
-                        </div>
-                        <v-select v-model="subject" :items="subjects" label="Subject">
-                            <template v-slot:item="data">
-                                <v-list-item
-                                    v-bind="data.props"
-                                    class="bg-transparent"
-                                ></v-list-item>
-                            </template>
-                        </v-select>
-                        <v-textarea
-                            v-model="description"
-                            :maxlength="descriptionMaxLength"
-                            label="Please Describe Your Issue"
-                            rows="5"
-                            auto-grow
-                            counter
-                            outlined
+                <div class="issue-form">
+                    <div class="d-flex flex-row ga-1">
+                        <v-text-field
+                            v-model="email"
+                            :maxlength="textFieldMaxLength"
+                            label="Email Address"
                         />
+                        <v-text-field v-model="name" :maxlength="textFieldMaxLength" label="Name" />
                     </div>
+                    <v-select v-model="subject" :items="subjects" label="Subject">
+                        <template v-slot:item="data">
+                            <v-list-item v-bind="data.props" class="bg-transparent"></v-list-item>
+                        </template>
+                    </v-select>
+                    <v-textarea
+                        v-model="description"
+                        :maxlength="descriptionMaxLength"
+                        label="Please Describe Your Issue"
+                        rows="5"
+                        auto-grow
+                        counter
+                        outlined
+                    />
+                </div>
 
-                    <v-btn v-if="!submitting" :disabled="isDisabled" class="mb-4" @click="submit">
-                        Submit
-                    </v-btn>
-                    <v-progress-circular v-else-if="submitting" indeterminate />
+                <v-btn v-if="!submitting" :disabled="isDisabled" class="mb-4" @click="submit">
+                    Submit
+                </v-btn>
+                <v-progress-circular v-else-if="submitting" indeterminate />
 
-                    <p v-if="issueUrl">
-                        Issue was opened successfully. We will be in touch soon. You may view your
-                        opened issue at
-                        <a :href="issueUrl" target="_blank">{{ issueUrl }}</a
-                        >.
-                    </p>
-                    <p v-if="errorMessage">
-                        {{ errorMessage }}
-                    </p>
-                </v-card-text>
-            </v-card>
-        </v-menu>
-    </v-btn>
+                <p v-if="issueUrl">
+                    Issue was opened successfully. We will be in touch soon. You may view your
+                    opened issue at
+                    <a :href="issueUrl" target="_blank">{{ issueUrl }}</a
+                    >.
+                </p>
+                <p v-if="errorMessage">
+                    {{ errorMessage }}
+                </p>
+            </v-card-text>
+        </v-card>
+    </v-menu>
 </template>
 
 <script setup>
 import Cookies from "js-cookie"
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useUserStore } from "@/stores/user"
 
 const basePath = import.meta.env.VITE_BASE_PATH
@@ -88,6 +77,10 @@ const submissionTimeout = 1000 // one second
 const isDisabled = computed(
     () => !email.value || !name.value || !subject.value || !description.value
 )
+
+onMounted(() => {
+    setDefaultEmail()
+})
 
 function reset() {
     setDefaultEmail()

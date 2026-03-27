@@ -3,61 +3,8 @@
     <v-app>
         <v-main>
             <v-app-bar elevation="0">
-                <div class="app-bar-corner app-bar-start">
-                    <v-app-bar-title
-                        class="cursor-pointer flex-0-1 mr-1"
-                        @click="$router.push(basePath)"
-                    >
-                        <v-img :src="`${basePath}logo_bw.png`" alt="NOVA Logo" width="200" />
-                    </v-app-bar-title>
-
-                    <InfoPanel />
-                    <NotificationPanel ref="notificationPanel" v-show="is_admin" />
-                    <a
-                        :href="galaxyUrl"
-                        class="mx-2 text-decoration-none text-white"
-                        target="_blank"
-                    >
-                        <v-tooltip activator="parent">{{ galaxyAlias }}</v-tooltip>
-
-                        <v-img
-                            :src="`${basePath}galaxy_icon.png`"
-                            alt="Galaxy Square Logo"
-                            width="20"
-                        />
-                    </a>
-                    <CitationPanel />
-                </div>
-
-                <div class="app-bar-corner app-bar-end">
-                    <ActiveToolsPanel class="mr-4" />
-                    <BugPanel ref="bugPanel" />
-                    <HelpPanel />
-
-                    <v-btn
-                        v-if="!is_logged_in && !route.path.startsWith('/launch')"
-                        :href="loginUrl"
-                    >
-                        Login
-                    </v-btn>
-
-                    <PreferencesPanel />
-
-                    <v-btn v-if="is_logged_in" icon>
-                        <v-icon>mdi-account-circle</v-icon>
-
-                        <v-menu activator="parent">
-                            <v-list>
-                                <v-list-item>
-                                    {{ email }}
-                                </v-list-item>
-                                <v-list-item prepend-icon="mdi-logout" href="/user">
-                                    Logout via {{ galaxyAlias }}
-                                </v-list-item>
-                            </v-list>
-                        </v-menu>
-                    </v-btn>
-                </div>
+                <DesktopLayout v-if="mdAndUp" :tool-list="toolList" />
+                <MobileLayout v-else :tool-list="toolList" />
             </v-app-bar>
 
             <StatusPanel />
@@ -122,37 +69,27 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue"
 import { storeToRefs } from "pinia"
-import { RouterView, useRoute } from "vue-router"
+import { computed, ref } from "vue"
+import { RouterView } from "vue-router"
+import { useDisplay } from "vuetify"
 
-import ActiveToolsPanel from "@/components/ActiveToolsPanel.vue"
-import BugPanel from "@/components/BugPanel.vue"
-import HelpPanel from "@/components/HelpPanel.vue"
-import PreferencesPanel from "@/components/PreferencesPanel.vue"
+import DesktopLayout from "@/layouts/DesktopLayout.vue"
+import MobileLayout from "@/layouts/MobileLayout.vue"
 import ToolDrawer from "@/components/ToolDrawer.vue"
 import { getTools } from "@/router"
 import { useJobStore } from "@/stores/job"
 import { useUserStore } from "@/stores/user"
-import CitationPanel from "@/components/CitationPanel.vue"
-import InfoPanel from "@/components/InfoPanel.vue"
-import NotificationPanel from "@/components/NotificationPanel.vue"
 import StatusPanel from "@/components/StatusPanel.vue"
 
+const { mdAndUp } = useDisplay()
 const job = useJobStore()
-const { running } = storeToRefs(job)
+const { all_jobs, jobs, running } = storeToRefs(job)
 const user = useUserStore()
-const { email, is_admin, is_logged_in } = storeToRefs(user)
-const route = useRoute()
-const bugPanel = ref(null)
 const drawer = ref(false)
 const notificationPanel = ref(null)
-const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
-const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
-
-const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
 
 const genericTools = computed(() => {
     const tools = getTools()
@@ -164,25 +101,43 @@ const genericTools = computed(() => {
     return []
 })
 
-onMounted(async () => {
-    await user.getUser()
-    bugPanel.value.setDefaultEmail()
-})
-
 function toggleDrawer() {
     drawer.value = !drawer.value
 }
+
+const jobList = computed(() => {
+    return Object.entries(jobs.value)
+})
+
+const toolList = computed(() => {
+    const tools = getTools()
+
+    // Returns all tools connected with a Galaxy job
+    const runningTools = []
+    Object.values(tools).forEach((toolCategory) => {
+        let all_tools = toolCategory.tools
+        if (toolCategory.prototype_tools !== undefined) {
+            all_tools = all_tools.concat(toolCategory.prototype_tools)
+        }
+        all_tools.forEach((tool) => {
+            jobList.value.forEach(([job_tool_id, job]) => {
+                if (
+                    tool.id === job_tool_id &&
+                    job.state === "ready" &&
+                    !runningTools.some((target) => target.id === tool.id)
+                ) {
+                    runningTools.push({ job: null, tool: tool })
+                }
+            })
+
+            all_jobs.value.forEach((job) => {
+                if (job.is_datafile_tool && tool.id === job.tool_id && job.url_ready) {
+                    runningTools.push({ job: job, tool: tool })
+                }
+            })
+        })
+    })
+
+    return runningTools
+})
 </script>
-
-<style scoped>
-.app-bar-corner {
-    align-items: center;
-    display: flex;
-    flex-basis: 0;
-    flex-grow: 1;
-}
-
-.app-bar-end {
-    justify-content: end;
-}
-</style>
