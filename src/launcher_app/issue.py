@@ -16,7 +16,7 @@ class IssueManager:
             json={
                 "description": f"""# Reported By
 
-{data["name"]} {data["email"]}
+{data["email"]} {data["name"]}
 
 # Mode of Contact
 
@@ -27,7 +27,7 @@ Issue submission form
 {data["description"]}
 
 # Internal Issue Links""",
-                "title": data["title"],
+                "title": f"{data['subject']}",
             },
         )
         result = response.json()
