@@ -29,68 +29,28 @@
                     <CitationPanel />
                 </div>
 
-                <div>
-                    <a :href="novaDocsUrl" class="text-decoration-none text-white" target="_blank">
-                        {{ novaAlias }} Documentation
-                    </a>
-                    <span class="mx-1">&middot;</span>
-                    <a
-                        :href="novaTutorialUrl"
-                        class="text-decoration-none text-white"
-                        target="_blank"
-                    >
-                        {{ novaAlias }} Tutorial
-                    </a>
-                    <span class="mx-1">&middot;</span>
-                    <a
-                        :href="galaxyDocsUrl"
-                        class="text-decoration-none text-white"
-                        target="_blank"
-                    >
-                        Admin Guide
-                    </a>
-                </div>
-
                 <div class="app-bar-corner app-bar-end">
                     <ActiveToolsPanel class="mr-4" />
                     <BugPanel ref="bugPanel" class="mr-4" />
+                    <HelpPanel />
 
-                    <span v-if="is_logged_in" class="pr-2 text-button">
-                        {{ email }}
-                    </span>
-                    <v-btn v-else-if="!route.path.startsWith('/launch')" :href="loginUrl">
+                    <v-btn
+                        v-if="!is_logged_in && !route.path.startsWith('/launch')"
+                        :href="loginUrl"
+                    >
                         Login
                     </v-btn>
 
-                    <v-btn v-if="is_logged_in" icon>
-                        <v-icon>mdi-cogs</v-icon>
-
-                        <v-menu activator="parent" :close-on-content-click="false">
-                            <v-card width="400">
-                                <v-card-title>Preferences</v-card-title>
-
-                                <v-card-text>
-                                    <v-switch
-                                        v-model="autoopen"
-                                        label="Automatically Open Tools in a New Tab After Launch"
-                                        hide-details
-                                        @click="user.toggleAutoopen()"
-                                    />
-                                    <p class="text-caption">
-                                        If tools don't automatically open after launching, then you
-                                        may need to allow pop-ups on this site in your browser or
-                                        browser extension settings.
-                                    </p>
-                                </v-card-text>
-                            </v-card>
-                        </v-menu>
-                    </v-btn>
+                    <PreferencesPanel />
 
                     <v-btn v-if="is_logged_in" icon>
                         <v-icon>mdi-account-circle</v-icon>
 
                         <v-menu activator="parent">
                             <v-list>
+                                <v-list-item>
+                                    {{ email }}
+                                </v-list-item>
                                 <v-list-item prepend-icon="mdi-logout" href="/user">
                                     Logout via {{ galaxyAlias }}
                                 </v-list-item>
@@ -168,6 +128,8 @@ import { RouterView, useRoute } from "vue-router"
 
 import ActiveToolsPanel from "@/components/ActiveToolsPanel.vue"
 import BugPanel from "@/components/BugPanel.vue"
+import HelpPanel from "@/components/HelpPanel.vue"
+import PreferencesPanel from "@/components/PreferencesPanel.vue"
 import ToolDrawer from "@/components/ToolDrawer.vue"
 import { getTools } from "@/router"
 import { useJobStore } from "@/stores/job"
@@ -180,7 +142,7 @@ import StatusPanel from "@/components/StatusPanel.vue"
 const job = useJobStore()
 const { running } = storeToRefs(job)
 const user = useUserStore()
-const { autoopen, email, is_admin, is_logged_in } = storeToRefs(user)
+const { email, is_admin, is_logged_in } = storeToRefs(user)
 const route = useRoute()
 const bugPanel = ref(null)
 const drawer = ref(false)
@@ -188,11 +150,7 @@ const notificationPanel = ref(null)
 const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
 const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
-const galaxyDocsUrl = import.meta.env.VITE_GALAXY_DOCS_URL
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
-const novaAlias = import.meta.env.VITE_NOVA_ALIAS
-const novaDocsUrl = import.meta.env.VITE_NOVA_DOCS_URL
-const novaTutorialUrl = import.meta.env.VITE_NOVA_TUTORIAL_URL
 
 const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
 

@@ -2,7 +2,7 @@
     <v-btn size="small">
         Citing {{ galaxyAlias }}/{{ novaAlias }}
 
-        <v-menu activator="parent" :close-on-content-click="false" open-on-hover>
+        <v-menu activator="parent" :close-on-content-click="false">
             <v-card width="600">
                 <v-card-title class="mb-2 px-0"
                     >Citing {{ galaxyAlias }}/{{ novaAlias }}</v-card-title
