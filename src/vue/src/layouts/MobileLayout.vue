@@ -100,7 +100,7 @@ const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
 const novaAlias = import.meta.env.VITE_NOVA_ALIAS
-const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
+const loginUrl = computed(() => baseLoginUrl + route.fullPath)
 
 onMounted(async () => {
     await user.getUser()

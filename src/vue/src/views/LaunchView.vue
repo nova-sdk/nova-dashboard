@@ -65,7 +65,7 @@ const baseLoginUrl = import.meta.env.VITE_LOGIN_URL
 const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 
-const loginUrl = computed(() => baseLoginUrl + route.fullPath.replace(basePath, "/"))
+const loginUrl = computed(() => baseLoginUrl + route.fullPath)
 
 async function monitorCallback() {
     if (!has_monitored.value || !is_logged_in.value || targetTool.value === null) {
