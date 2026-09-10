@@ -6,7 +6,7 @@
             </v-banner>
             <v-card-text v-else>
                 <p class="mb-4">The content you requested could not be found.</p>
-                <v-btn to="/">Home</v-btn>
+                <v-btn :to="basePath">Home</v-btn>
             </v-card-text>
         </v-card>
     </v-container>
@@ -16,4 +16,6 @@
 import { useJobStore } from "@/stores/job"
 
 const job = useJobStore()
+
+const basePath = import.meta.env.VITE_BASE_PATH
 </script>
