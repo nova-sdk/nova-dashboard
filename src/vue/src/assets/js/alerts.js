@@ -144,6 +144,7 @@ export default class AlertManager {
 
         this.services = {
             infrastructure: new Service("Infrastructure"),
+            idp: new Service("Authentication Services", await this.getSubservices(targets, "idp")),
             instrument_data: new Service(
                 "Instrument Data",
                 await this.getInstrumentAlerts(targets)

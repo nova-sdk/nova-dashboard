@@ -1,3 +1,7 @@
+### nova-dashboard, 1.1.2
+
+* Identity provider status is now displayed in the status panel (thanks to John Duggan).
+
 ### nova-dashboard, 1.1.1
 
 * Fix "HOME" link on 404 page to point to dashboard homepage rather than Galaxy (thanks to John Duggan).
