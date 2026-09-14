@@ -12,8 +12,11 @@
                 v-if="notification?.display && notification?.message"
                 class="bg-warning justify-center py-0"
             >
-                <v-icon class="mr-1">mdi-information-outline</v-icon>
-                {{ notification?.message }}
+                <template v-slot:prepend>
+                    <v-icon>mdi-information-outline</v-icon>
+                </template>
+
+                <v-banner-text v-html="notification?.message" />
             </v-banner>
 
             <v-fab
