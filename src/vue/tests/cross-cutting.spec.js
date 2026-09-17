@@ -25,8 +25,21 @@ test.describe("14. Cross-Cutting Concerns", () => {
 
         await page.setViewportSize({ width: 400, height: 800 })
 
+        // DesktopLayout and MobileLayout (App.vue) are two separate components swapped via
+        // v-if/v-else, each with its own independent v-menu - so crossing the breakpoint
+        // unmounts the open desktop menu rather than carrying it over. v-menu's own closing
+        // transition briefly leaves its content in the DOM after that swap, so asserting
+        // toHaveCount(1) here (as this test used to) raced that transition and was flaky:
+        // it passed only when a poll happened to land before the transition finished.
+        // Waiting for the new layout's own menu button first lets that transition settle.
+        const mobileMenuButton = iconButton(page, "mdi-menu")
+        await expect(mobileMenuButton).toBeVisible()
+        await expect(page.getByText("Logged in as scientist@ornl.gov")).toHaveCount(0)
+
+        // Opening the new mobile menu should show the same info exactly once - not doubled
+        // up by any stale content left over from the desktop layout.
+        await mobileMenuButton.click()
         await expect(page.getByText("Logged in as scientist@ornl.gov")).toHaveCount(1)
-        await expect(iconButton(page, "mdi-menu")).toBeVisible()
     })
 
     test("14.4 header controls and a tool row's buttons are keyboard operable", async ({
