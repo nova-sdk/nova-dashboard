@@ -42,6 +42,22 @@ pixi run ./manage.py runserver_plus --insecure 0.0.0.0:8080
 
 Pixi will create a `.pixi` folder containing a virtual environment for this project. Please configure your IDE to use this environment.
 
+## Testing
+
+`tests/RUN_SHEET.md` is the manual QA checklist for the dashboard UI. Most of its cases now
+have automated Playwright coverage under `src/vue/tests`, run with:
+
+```bash
+cd src/vue
+pnpm exec playwright install --with-deps chromium  # once per machine
+pnpm run test:user-interface
+```
+
+This starts its own Vite dev server and runs entirely against mocked `/api/**` responses
+(see `src/vue/tests/mocks`) - no Django, Galaxy, Prometheus, or GitLab connectivity is
+required. Rows in `tests/RUN_SHEET.md` still marked `(TODO)`, or paired with a `test.fixme`
+in the user interface suite, remain manual-only for now.
+
 ## Docker
 
 ### Build the image

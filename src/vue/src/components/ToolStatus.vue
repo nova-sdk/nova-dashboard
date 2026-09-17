@@ -83,7 +83,7 @@ onMounted(() => {
         // Give Galaxy 10 seconds to launch the Docker container before reporting it as slow to respond.
         setTimeout(() => {
             // If there is a URL, then the container started during this timeout.
-            if (!props.url && !props?.state === "ok") {
+            if (!props.url && props?.state !== "ok") {
                 is_slow.value = true
             }
         }, 10000)

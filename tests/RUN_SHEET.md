@@ -1,6 +1,21 @@
 # NOVA Dashboard — Manual Test Run Sheet
 
-A checklist for manually testing the user interface. There is currently no automated test coverage in this repo, so this run sheet is the primary way to verify behavior before a release.
+A checklist for manually testing the user interface.
+
+## Automated coverage
+
+Most rows below now have an automated Playwright equivalent in `src/vue/tests`
+(`pnpm run test:user-interface` from `src/vue`), organized into one spec file per section (e.g. section
+4 → `tool-lifecycle.spec.js`). Rows already marked `(TODO)` here remain manual-only, mirrored
+in the suite as `test.fixme(...)` with a note on why. If you're updating a row below, check
+whether the matching spec needs a matching update.
+
+Two gaps the suite surfaced while being written, worth fixing in the app itself rather than
+in a test: `MONITORING_URL` (7.6/7.7) is a real Django setting that's never included in any
+API response, so the "View Monitoring Details" button can't currently appear regardless of
+configuration; and the status banner (7.4) doesn't actually hide itself when the monitoring
+endpoint is unreachable - it stays visible with a grey "Unable to check {alias} status."
+message, unlike this sheet's current wording.
 
 ## Disclosure of Generative AI
 
