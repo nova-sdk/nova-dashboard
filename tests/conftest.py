@@ -22,7 +22,26 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import django
 import pytest
+from django.conf import settings as django_settings
+
+# The Django settings module reads several environment variables that have no default
+# (SECRET_KEY, REFRESH_TOKEN_KEY, DEBUG, GALAXY_URL) and would otherwise raise KeyError
+# on import. These dummy values keep the view unit tests hermetic and independent of any
+# developer .env file; setdefault means a real .env loaded some other way still wins.
+os.environ.setdefault("SECRET_KEY", "test-secret-key")
+os.environ.setdefault("REFRESH_TOKEN_KEY", "test-refresh-token-key")
+os.environ.setdefault("DEBUG", "false")
+os.environ.setdefault("GALAXY_URL", "https://galaxy.example.test")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "src.launcher_app.settings")
+
+django.setup()
+
+# django.test.Client sends requests with HTTP_HOST=testserver, which ALLOWED_HOSTS
+# (defined for real deployments in settings.py) doesn't include.
+if "testserver" not in django_settings.ALLOWED_HOSTS:
+    django_settings.ALLOWED_HOSTS.append("testserver")
 
 VUE_DIR = Path(__file__).resolve().parent.parent / "src" / "vue"
 
