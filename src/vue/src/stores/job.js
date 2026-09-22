@@ -2,11 +2,20 @@ import Cookies from "js-cookie"
 import { defineStore } from "pinia"
 import { nextTick } from "vue"
 
+import {
+    cancelJob,
+    fetchJobStatus,
+    GalaxyApiError,
+    getHistoryId,
+    openEventStream,
+    runTool
+} from "@/services/galaxyDirect"
 import { useUserStore } from "@/stores/user"
 
 const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
+const galaxyHistoryName = import.meta.env.VITE_GALAXY_HISTORY_NAME || "launcher_history"
 
 export const useJobStore = defineStore("job", {
     state: () => {
@@ -23,6 +32,11 @@ export const useJobStore = defineStore("job", {
             jobs: {},
             running: false,
             timeout: 2000,
+            // Safety-net poll interval while relying on Galaxy's SSE stream - see
+            // startMonitor(). Kept much slower than the old 2s poll since it's
+            // now a fallback rather than the primary update mechanism.
+            fallback_timeout: 20000,
+            event_source: null,
             timeout_error: false,
             timeout_duration: 60000,
             error_reset_duration: 15000,
@@ -90,6 +104,42 @@ export const useJobStore = defineStore("job", {
                 return
             }
 
+            // Datafile tools ingest a file from the instrument's local/network
+            // filesystem (see GalaxyManager.ingest_file in the Django backend) -
+            // the browser has no access to that path, so this one launch path
+            // has to stay server-mediated regardless of how monitoring/stopping
+            // are done.
+            const isDatafileTool = Object.keys(inputs || {}).some((key) => key.startsWith("file_"))
+            if (isDatafileTool) {
+                return await this.launchJobViaDjango(tool_id, inputs)
+            }
+
+            try {
+                const historyId = await getHistoryId(galaxyHistoryName)
+                const results = await runTool(historyId, tool_id, inputs)
+                const job_id = results.jobs[0].id
+
+                this.running = true
+                this.jobs[tool_id].id = job_id
+
+                return job_id
+            } catch (error) {
+                this.jobs[tool_id].state = "stopped"
+
+                if (error instanceof GalaxyApiError && error.status === 403) {
+                    window.location.reload()
+                    return null
+                }
+
+                this.showErrorWithTimeout(
+                    `${galaxyAlias} failed to process your request. Please try again in a few minutes.`,
+                    tool_id
+                )
+
+                return null
+            }
+        },
+        async launchJobViaDjango(tool_id, inputs) {
             const response = await this.galaxyFetch("api/galaxy/launch/", {
                 method: "POST",
                 headers: {
@@ -123,28 +173,21 @@ export const useJobStore = defineStore("job", {
                 this.updateCalveraSpinner()
             }
 
-            const response = await this.galaxyFetch("api/galaxy/stop/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": Cookies.get("csrftoken")
-                },
-                body: JSON.stringify({
-                    api_key: this.user.apiKey,
-                    job_id: job_id
-                })
-            })
+            const stopped = await cancelJob(job_id)
 
-            if (response.status === 200) {
+            if (stopped) {
                 this.running = true
             } else if (tool_id !== undefined) {
                 this.jobs[tool_id].state = "ready"
 
-                await this.handleError(response, true, tool_id)
+                this.showErrorWithTimeout(
+                    `${galaxyAlias} failed to stop this tool. Please try again in a few minutes.`,
+                    tool_id
+                )
             }
         },
         async monitorJobs() {
-            if (this.is_monitoring || this.user.apiKey === "") {
+            if (this.is_monitoring || !this.user.is_logged_in) {
                 return
             }
 
@@ -155,21 +198,24 @@ export const useJobStore = defineStore("job", {
                 for (const j in this.jobs) {
                     job_ids[j] = this.jobs[j].id
                 }
-                const response = await this.galaxyFetch("api/galaxy/monitor/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": Cookies.get("csrftoken")
-                    },
-                    body: JSON.stringify({
-                        api_key: this.user.apiKey,
-                        tool_ids: job_ids
-                    })
-                })
 
-                if (response.status === 200) {
-                    const data = await response.json()
+                let data = null
+                let requestFailed = false
+                try {
+                    data = await fetchJobStatus(galaxyHistoryName, job_ids)
+                } catch (error) {
+                    requestFailed = true
+                    if (error instanceof GalaxyApiError && error.status === 403) {
+                        if (this.monitoring_autolaunch) {
+                            return
+                        }
+                        // The user's Galaxy session has expired; a reload sends them back through login.
+                        window.location.reload()
+                        return
+                    }
+                }
 
+                if (!requestFailed) {
                     let hasErrors = false
 
                     this.all_jobs = data.jobs
@@ -271,7 +317,7 @@ export const useJobStore = defineStore("job", {
                         this.galaxy_error = ""
                     }
                 } else {
-                    await this.handleError(response, false)
+                    this.galaxy_error = `${galaxyAlias} failed to process your request. Please try again in a few minutes.`
                 }
 
                 this.updateCalveraSpinner()
@@ -295,14 +341,32 @@ export const useJobStore = defineStore("job", {
             this.callback = callback
             this.monitoring_autolaunch = monitoring_autolaunch
 
-            if (this.monitor_interval === null) {
-                this.monitorJobs()
-            } else {
+            this.stopMonitor()
+            this.monitorJobs()
+
+            // Push-driven updates via Galaxy's native SSE stream (requires Galaxy
+            // 26.1+ with enable_sse_updates: true - see galaxyDirect.js). Both
+            // entry_point_update (interactive tool state) and history_update
+            // (job/dataset state) can signal a change worth re-checking.
+            this.event_source = openEventStream({
+                onEntryPointUpdate: () => this.monitorJobs(),
+                onHistoryUpdate: () => this.monitorJobs()
+            })
+
+            // Fallback poll: Galaxy's SSE support is new, admin-gated, and even
+            // its own PR review noted it can silently drop events, so we keep a
+            // low-frequency safety net instead of trusting push exclusively.
+            this.monitor_interval = window.setInterval(this.monitorJobs, this.fallback_timeout)
+        },
+        stopMonitor() {
+            if (this.event_source !== null) {
+                this.event_source.close()
+                this.event_source = null
+            }
+            if (this.monitor_interval !== null) {
                 window.clearInterval(this.monitor_interval)
                 this.monitor_interval = null
             }
-
-            this.monitor_interval = window.setInterval(this.monitorJobs, this.timeout)
         },
         updateCalveraSpinner() {
             // Turn on the spinner in the footer if any job is being started or stopped
