@@ -1,21 +1,20 @@
-import Cookies from "js-cookie"
 import { defineStore } from "pinia"
 import { nextTick } from "vue"
 
 import {
     cancelJob,
+    DatafileRegistrationError,
     fetchJobStatus,
     GalaxyApiError,
-    getHistoryId,
+    launchTool,
     openEventStream,
-    runTool
+    TERMINAL_STATES
 } from "@/services/galaxyDirect"
 import { useUserStore } from "@/stores/user"
 
-const basePath = import.meta.env.VITE_BASE_PATH
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
-const galaxyHistoryName = import.meta.env.VITE_GALAXY_HISTORY_NAME || "launcher_history"
+const galaxyHistoryName = import.meta.env.GALAXY_HISTORY_NAME || "launcher_history"
 
 export const useJobStore = defineStore("job", {
     state: () => {
@@ -29,49 +28,29 @@ export const useJobStore = defineStore("job", {
             static_error: false,
             has_monitored: false,
             is_monitoring: false,
+            // Set when monitorJobs() is requested while a run is in flight, so the
+            // triggering SSE event isn't dropped - see monitorJobs().
+            monitor_requested: false,
             jobs: {},
             running: false,
-            timeout: 2000,
-            // Safety-net poll interval while relying on Galaxy's SSE stream - see
-            // startMonitor(). Kept much slower than the old 2s poll since it's
-            // now a fallback rather than the primary update mechanism.
-            fallback_timeout: 20000,
             event_source: null,
+            // Galaxy's SSE stream only reports changes to history/dataset rows and an
+            // interactive tool's entry point becoming ready, so a job with no outputs
+            // (queued -> running, exiting on its own, errors, cancellation) produces no
+            // event. While any job is in flight, monitorJobs() therefore reschedules
+            // itself every poll_interval - see schedulePoll().
+            poll_interval: 2000,
+            poll_timer: null,
+            // Set while Galaxy's SSE stream is down. The error has to stay visible
+            // until the stream reconnects, even if a poll in between succeeds.
+            stream_error: false,
             timeout_error: false,
             timeout_duration: 60000,
             error_reset_duration: 15000,
-            monitor_interval: null,
             monitoring_autolaunch: false
         }
     },
     actions: {
-        async handleError(response, timeout, tool_id) {
-            let message = ""
-
-            if (response.status === 403) {
-                if (this.monitoring_autolaunch) {
-                    return
-                } else {
-                    // The users login has expired and they must login to use the site. Refreshing makes it clear that they need to sign in without showing large error messages.
-                    window.location.reload()
-                }
-            } else {
-                try {
-                    // Most of our views will return a JSON with a detailed error message.
-                    const data = await response.json()
-                    message = `${galaxyAlias} error: ${data.error}`
-                } catch {
-                    // If we don't get a JSON back, then we fallback to a generic error message.
-                    message = `${galaxyAlias} failed to process your request. Please try again in a few minutes.`
-                }
-            }
-
-            if (timeout) {
-                this.showErrorWithTimeout(message, tool_id)
-            } else {
-                this.galaxy_error = message
-            }
-        },
         showErrorWithTimeout(message, tool_id) {
             this.timeout_error = true
             setTimeout(() => {
@@ -82,11 +61,6 @@ export const useJobStore = defineStore("job", {
             }, this.error_reset_duration)
 
             this.galaxy_error = message
-        },
-        async galaxyFetch(endpoint, options) {
-            await this.user.getUserId()
-
-            return await fetch(`${basePath}${endpoint}`, options)
         },
         async launchJob(tool_id, inputs) {
             this.jobs[tool_id] = {
@@ -104,23 +78,17 @@ export const useJobStore = defineStore("job", {
                 return
             }
 
-            // Datafile tools ingest a file from the instrument's local/network
-            // filesystem (see GalaxyManager.ingest_file in the Django backend) -
-            // the browser has no access to that path, so this one launch path
-            // has to stay server-mediated regardless of how monitoring/stopping
-            // are done.
-            const isDatafileTool = Object.keys(inputs || {}).some((key) => key.startsWith("file_"))
-            if (isDatafileTool) {
-                return await this.launchJobViaDjango(tool_id, inputs)
-            }
+            // Tools launched with inputs are datafile tools; their launch errors are shown until dismissed.
+            const isDatafileTool = Object.keys(inputs || {}).length > 0
 
             try {
-                const historyId = await getHistoryId(galaxyHistoryName)
-                const results = await runTool(historyId, tool_id, inputs)
-                const job_id = results.jobs[0].id
+                const job_id = await launchTool(galaxyHistoryName, tool_id, inputs || {})
 
                 this.running = true
                 this.jobs[tool_id].id = job_id
+
+                // Start polling now that a job is in flight.
+                this.monitorJobs()
 
                 return job_id
             } catch (error) {
@@ -131,38 +99,15 @@ export const useJobStore = defineStore("job", {
                     return null
                 }
 
-                this.showErrorWithTimeout(
-                    `${galaxyAlias} failed to process your request. Please try again in a few minutes.`,
-                    tool_id
-                )
-
-                return null
-            }
-        },
-        async launchJobViaDjango(tool_id, inputs) {
-            const response = await this.galaxyFetch("api/galaxy/launch/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": Cookies.get("csrftoken")
-                },
-                body: JSON.stringify({
-                    api_key: this.user.apiKey,
-                    tool_id: tool_id,
-                    inputs: inputs
-                })
-            })
-
-            if (response.status === 200) {
-                this.running = true
-                const data = await response.json()
-                this.jobs[tool_id].id = data.id
-
-                return data.id
-            } else {
-                this.jobs[tool_id].state = "stopped"
-
-                await this.handleError(response, Object.keys(inputs).length <= 0, tool_id)
+                const message =
+                    error instanceof DatafileRegistrationError
+                        ? `${galaxyAlias} error: ${error.message}`
+                        : `${galaxyAlias} failed to process your request. Please try again in a few minutes.`
+                if (isDatafileTool) {
+                    this.galaxy_error = message
+                } else {
+                    this.showErrorWithTimeout(message, tool_id)
+                }
 
                 return null
             }
@@ -177,6 +122,10 @@ export const useJobStore = defineStore("job", {
 
             if (stopped) {
                 this.running = true
+
+                // Galaxy marks the job deleted before responding, so resync now rather
+                // than waiting for the next poll.
+                this.monitorJobs()
             } else if (tool_id !== undefined) {
                 this.jobs[tool_id].state = "ready"
 
@@ -187,11 +136,18 @@ export const useJobStore = defineStore("job", {
             }
         },
         async monitorJobs() {
-            if (this.is_monitoring || !this.user.is_logged_in) {
+            if (!this.user.is_logged_in) {
+                return
+            }
+            if (this.is_monitoring) {
+                // Updates are push-only, so an event that arrives mid-run must not be
+                // dropped: run once more after the current run finishes.
+                this.monitor_requested = true
                 return
             }
 
             this.is_monitoring = true
+            this.monitor_requested = false
 
             try {
                 const job_ids = {}
@@ -313,7 +269,12 @@ export const useJobStore = defineStore("job", {
                         }
                     })
 
-                    if (!hasErrors && !this.timeout_error && !this.static_error) {
+                    if (
+                        !hasErrors &&
+                        !this.timeout_error &&
+                        !this.static_error &&
+                        !this.stream_error
+                    ) {
                         this.galaxy_error = ""
                     }
                 } else {
@@ -334,6 +295,36 @@ export const useJobStore = defineStore("job", {
                 })
             } finally {
                 this.is_monitoring = false
+                if (this.monitor_requested) {
+                    this.monitorJobs()
+                } else {
+                    this.schedulePoll()
+                }
+            }
+        },
+        jobsInFlight() {
+            return (
+                Object.values(this.jobs).some((job) =>
+                    ["submitting", "new", "queued", "running", "ready", "stopping"].includes(
+                        job.state
+                    )
+                ) ||
+                this.all_jobs.some(
+                    (job) =>
+                        (job.is_datafile_tool || job.is_extra_tool) &&
+                        !TERMINAL_STATES.includes(job.state)
+                )
+            )
+        },
+        schedulePoll() {
+            window.clearTimeout(this.poll_timer)
+            this.poll_timer = null
+
+            // Only poll while there is something SSE can't tell us about; an idle
+            // dashboard is woken by launchJob() or an SSE event instead. Failures
+            // are not swallowed: each run shows its own error banner.
+            if (this.event_source !== null && this.jobsInFlight()) {
+                this.poll_timer = window.setTimeout(() => this.monitorJobs(), this.poll_interval)
             }
         },
         startMonitor(allow_autoopen, callback, monitoring_autolaunch) {
@@ -342,31 +333,44 @@ export const useJobStore = defineStore("job", {
             this.monitoring_autolaunch = monitoring_autolaunch
 
             this.stopMonitor()
-            this.monitorJobs()
 
-            // Push-driven updates via Galaxy's native SSE stream (requires Galaxy
-            // 26.1+ with enable_sse_updates: true - see galaxyDirect.js). Both
-            // entry_point_update (interactive tool state) and history_update
-            // (job/dataset state) can signal a change worth re-checking.
+            // Galaxy's native SSE stream (requires Galaxy 26.1+ with
+            // enable_sse_updates: true - see galaxyDirect.js) gives instant updates;
+            // schedulePoll() covers the job state changes it can't report. If the
+            // stream fails, the user sees an error instead of silently degraded monitoring.
             this.event_source = openEventStream({
                 onEntryPointUpdate: () => this.monitorJobs(),
-                onHistoryUpdate: () => this.monitorJobs()
+                onHistoryUpdate: () => this.monitorJobs(),
+                onOpen: () => {
+                    if (this.stream_error) {
+                        // The browser reconnected on its own; resync anything missed while down.
+                        this.stream_error = false
+                        this.galaxy_error = ""
+                        this.monitorJobs()
+                    }
+                },
+                onError: () => {
+                    this.stream_error = true
+                    if (this.event_source?.readyState === EventSource.CLOSED) {
+                        // Not retryable (e.g. SSE disabled on Galaxy, or an auth failure).
+                        this.galaxy_error = `${galaxyAlias} live job updates are unavailable. Please refresh the page, and if this persists, use the 'Report Issue' button in the header to let us know.`
+                    } else {
+                        this.galaxy_error = `${galaxyAlias} live job updates were interrupted. Reconnecting...`
+                    }
+                }
             })
 
-            // Fallback poll: Galaxy's SSE support is new, admin-gated, and even
-            // its own PR review noted it can silently drop events, so we keep a
-            // low-frequency safety net instead of trusting push exclusively.
-            this.monitor_interval = window.setInterval(this.monitorJobs, this.fallback_timeout)
+            // After the stream exists, so the first run can schedule the poll.
+            this.monitorJobs()
         },
         stopMonitor() {
             if (this.event_source !== null) {
                 this.event_source.close()
                 this.event_source = null
             }
-            if (this.monitor_interval !== null) {
-                window.clearInterval(this.monitor_interval)
-                this.monitor_interval = null
-            }
+            window.clearTimeout(this.poll_timer)
+            this.poll_timer = null
+            this.stream_error = false
         },
         updateCalveraSpinner() {
             // Turn on the spinner in the footer if any job is being started or stopped

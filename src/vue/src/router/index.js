@@ -4,6 +4,7 @@
 
 import { createRouter, createWebHistory } from "vue-router"
 
+import { getTools as getGalaxyTools } from "../services/galaxyDirect"
 import { useJobStore } from "../stores/job"
 import CategoryView from "../views/CategoryView.vue"
 import LaunchView from "../views/LaunchView.vue"
@@ -19,13 +20,21 @@ export function getTools() {
 export default async function initRouter() {
     const basePath = import.meta.env.VITE_BASE_PATH
     const dashboardTitle = import.meta.env.VITE_DASHBOARD_TITLE
+    const galaxyUrl = import.meta.env.VITE_GALAXY_URL
     const job = useJobStore()
-    const response = await fetch(`${basePath}api/galaxy/tools/`)
-    const toolResponse = await response.json()
-    if (response.status === 500) {
-        job.galaxy_error = toolResponse.error
+    try {
+        tools = await getGalaxyTools()
+    } catch (error) {
+        // Mirrors the messages the removed Django `/api/galaxy/tools/` view returned.
+        if (error instanceof SyntaxError) {
+            job.galaxy_error = `Unable to fetch tool list, ${galaxyUrl} may be restarting.`
+        } else if (error instanceof TypeError || error.status === 502) {
+            job.galaxy_error = `Unable to connect to Galaxy, ${galaxyUrl} may be restarting.`
+        } else {
+            job.galaxy_error = error.message
+        }
+        tools = {}
     }
-    tools = toolResponse.tools
 
     const router = createRouter({
         history: createWebHistory(), // This is html5 mode for Vue Router

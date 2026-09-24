@@ -27,6 +27,8 @@ export default defineConfig(({ mode }) => {
             }
         },
         envDir: "../..",
+        // These Galaxy settings predate talking to Galaxy from the front-end, so they keep their unprefixed names.
+        envPrefix: ["VITE_", "EXTRA_TOOLS", "GALAXY_HISTORY_NAME", "TEST_TOOL_ID", "TOOL_PREFIX"],
         plugins: [vue(), vuetify()],
         resolve: {
             alias: {

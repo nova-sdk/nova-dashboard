@@ -40,6 +40,15 @@ export class GalaxyApiError extends Error {
     }
 }
 
+export class DatafileRegistrationError extends Error {
+    constructor(key) {
+        super(
+            `File for parameter '${key}' failed to register to Galaxy. ` +
+                "The filepath is likely malformed or nonexistent."
+        )
+    }
+}
+
 function sessionCsrfToken() {
     // See the module docstring above - unverified against a live Galaxy instance.
     return window.Galaxy?.session_csrf_token ?? ""
@@ -67,6 +76,107 @@ async function galaxyApi(path, options = {}) {
     }
 
     return response
+}
+
+// Tool filtering config, exposed to the front-end via envPrefix in vite.config.js.
+const toolPrefix = import.meta.env.TOOL_PREFIX || "nova"
+const testToolId = import.meta.env.TEST_TOOL_ID || ""
+const extraTools = (import.meta.env.EXTRA_TOOLS || "").split(",")
+
+function parseToolHelp(toolHelp) {
+    const text = new DOMParser().parseFromString(toolHelp, "text/html").body.textContent || ""
+
+    // Grab only the first line of the help text.
+    return text.trim().split("\n")[0].trim()
+}
+
+/**
+ * Client-side port of the removed Django GalaxyManager.get_tools: fetches the
+ * tool panel from GET /api/tools?tool_help=true and groups the dashboard's tools
+ * by category. Returns the same shape the old `/api/galaxy/tools/` view did.
+ */
+export async function getTools() {
+    const galaxyTools = await (await galaxyApi("/api/tools?tool_help=true")).json()
+    const toolJson = {}
+    const mainCategories = []
+
+    for (const galaxyCategory of galaxyTools) {
+        let categoryId = galaxyCategory.id ?? "generic-tools-main"
+
+        // Galaxy doesn't behave well if a non-prototype and prototype section/category have the same ID, so the
+        // notion of a main category allows them to have separate IDs in Galaxy while being grouped here.
+        const isMainCategory = categoryId.endsWith("-main")
+        if (isMainCategory) {
+            categoryId = categoryId.slice(0, -5)
+            mainCategories.push(categoryId)
+        }
+
+        if (!(categoryId in toolJson)) {
+            toolJson[categoryId] = {
+                fallback_name: "",
+                name: "",
+                description: "",
+                tools: [],
+                prototype_tools: []
+            }
+        }
+
+        const category = toolJson[categoryId]
+        if (isMainCategory) {
+            category.name = galaxyCategory.name ?? ""
+            category.description = galaxyCategory.description ?? ""
+        }
+        category.fallback_name = categoryId
+
+        for (const tool of galaxyCategory.elems ?? []) {
+            const toolId = tool.id.trim()
+            if (
+                !toolId.startsWith(toolPrefix) &&
+                toolId !== testToolId &&
+                !extraTools.includes(toolId)
+            ) {
+                continue
+            }
+
+            const toolData = {
+                id: toolId,
+                description: parseToolHelp(tool.help ?? ""),
+                name: tool.name ?? "Unnamed Tool",
+                version: tool.version ?? "unversioned",
+                documentation: tool.documentation ?? ""
+            }
+            if (toolId.includes("prototype")) {
+                category.prototype_tools.push(toolData)
+            } else {
+                category.tools.push(toolData)
+            }
+        }
+    }
+
+    // Galaxy returns the sections in a deterministic, but somewhat arbitrary order. This forces all of our main
+    // categories to appear first in alphabetical order.
+    mainCategories.sort()
+    const orderedIds = [
+        ...mainCategories,
+        ...Object.keys(toolJson).filter((id) => !mainCategories.includes(id))
+    ]
+
+    // If a category has no tools (this is common for prototype categories with no NOVA tools), then we hide it.
+    const orderedJson = {}
+    for (const categoryId of orderedIds) {
+        const category = toolJson[categoryId]
+        if (!category.tools.length && !category.prototype_tools.length) {
+            continue
+        }
+        if (!category.name) {
+            category.name = category.fallback_name
+                .replaceAll("-", " ")
+                .replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+        }
+        orderedJson[categoryId] = category
+    }
+
+    return orderedJson
 }
 
 const historyIdCache = new Map()
@@ -109,6 +219,63 @@ export async function runTool(historyId, toolId, inputs) {
     return await response.json()
 }
 
+const REGISTER_TOOL_ID = "neutrons_register"
+
+/** Polls a job until it reaches a terminal state, mirroring bioblend's jobs.wait_for_job. */
+async function waitForJob(jobId, intervalMs = 1000) {
+    for (;;) {
+        const { state } = await showJob(jobId)
+        if (TERMINAL_STATES.includes(state)) {
+            return state
+        }
+        await new Promise((resolve) => setTimeout(resolve, intervalMs))
+    }
+}
+
+/**
+ * Registers a file path from the instrument filesystem as a Galaxy dataset, mirroring the removed Django
+ * GalaxyManager.ingest_file. The path is read by the neutrons_register tool on the Galaxy side, so the browser
+ * never needs access to it. Returns the new dataset's id, or null if registration failed.
+ */
+export async function ingestFile(historyName, filePath) {
+    const historyId = await getHistoryId(`${historyName}_data`)
+    const results = await runTool(historyId, REGISTER_TOOL_ID, { "series_0|input": filePath })
+    const state = await waitForJob(results.jobs[0].id)
+
+    return state === "ok" ? (results.outputs[0]?.id ?? null) : null
+}
+
+/**
+ * Launches a tool, mirroring the removed Django GalaxyManager.launch_job: tools with inputs run in the
+ * datafile tools history, and any `file_` inputs are ingested first and passed to the tool as datasets.
+ * Returns the new job's id.
+ */
+export async function launchTool(historyName, toolId, inputs = {}) {
+    const hasInputs = Object.keys(inputs).length > 0
+    const historyId = await getHistoryId(hasInputs ? `${historyName}_datafile_tools` : historyName)
+
+    const toolInputs = {}
+    for (const [key, value] of Object.entries(inputs)) {
+        if (key.startsWith("file_")) {
+            const id = await ingestFile(historyName, value)
+            if (id === null) {
+                throw new DatafileRegistrationError(key)
+            }
+            toolInputs[key] = { src: "hda", id }
+        } else {
+            toolInputs[key] = value
+        }
+    }
+
+    // This allows us to test the error monitoring at will on the test instance
+    if (toolId === testToolId) {
+        toolInputs["command_mode|command"] = "fail"
+    }
+
+    const results = await runTool(historyId, toolId, toolInputs)
+    return results.jobs[0].id
+}
+
 /** Cancels a job outright, mirroring bioblend's jobs.cancel_job -> DELETE /api/jobs/{id}. */
 export async function cancelJob(jobId) {
     try {
@@ -147,8 +314,8 @@ export async function getEntryPoints(jobId) {
 
 /**
  * Probes whether an interactive tool's proxied URL is actually serving the
- * tool yet, replicating the body-sniffing check `GalaxyManager.monitor_jobs`
- * used to do server-side (Galaxy's proxy returns 200 with a placeholder page
+ * tool yet, replicating the body-sniffing check the removed Django
+ * `GalaxyManager.monitor_jobs` used to do server-side (Galaxy's proxy returns 200 with a placeholder page
  * before the tool container is really ready).
  */
 export async function probeToolUrl(url) {
@@ -157,12 +324,16 @@ export async function probeToolUrl(url) {
     try {
         const response = await fetch(url, { credentials: "include", signal: controller.signal })
         const text = await response.text()
-        return (
+        const ready =
             response.status === 200 &&
             !text.includes("Proxy target missing") &&
             !text.includes("Javascript Required for Galaxy")
-        )
-    } catch {
+        console.debug(`[galaxy probe] ${url} -> ${response.status}, ready: ${ready}`)
+        return ready
+    } catch (error) {
+        // An AbortError means the 100ms budget ran out; a TypeError is usually a
+        // network or CORS failure (e.g. the tool is served from another origin).
+        console.debug(`[galaxy probe] ${url} -> ${error.name}: ${error.message}`)
         return false
     } finally {
         clearTimeout(timer)
@@ -170,7 +341,7 @@ export async function probeToolUrl(url) {
 }
 
 /**
- * Reproduces GalaxyManager.monitor_jobs (src/launcher_app/galaxy.py) client-side:
+ * Client-side port of the removed Django GalaxyManager.monitor_jobs:
  * aggregates the dashboard's own non-terminal jobs, datafile-tool jobs, "extra"
  * jobs the dashboard didn't launch, and recently-known terminal jobs, then
  * resolves each one's interactive-tool URL/readiness. Returns the same shape
@@ -231,53 +402,51 @@ export async function fetchJobStatus(historyName, toolIds) {
         allJobs.push({ ...job, is_extra_tool: true })
     }
 
+    // Unlike the old Django monitor_jobs, a failed per-job lookup is not skipped:
+    // it fails the whole status fetch so the caller surfaces the error.
     const statusList = []
     for (const job of allJobs) {
-        try {
-            const state = job.state
-            if (state === "deleted") {
-                continue
-            }
-
-            let url = ""
-            let ready = false
-            if (state !== "error") {
-                const entryPoints = await getEntryPoints(job.id)
-                const entryPoint = entryPoints.find((ep) => ep.job_id === job.id && ep.target)
-                if (entryPoint) {
-                    url = `${galaxyUrl}${entryPoint.target}`
-                    ready = await probeToolUrl(url)
-                }
-            }
-
-            const data = {
-                is_datafile_tool: job.is_datafile_tool || false,
-                is_extra_tool: job.is_extra_tool || false,
-                job_id: job.id,
-                tool_id: job.tool_id,
-                state,
-                url,
-                url_ready: ready
-            }
-
-            if (data.is_datafile_tool) {
-                const full = await showJob(job.id)
-                const parameters = { ...(full.params || {}) }
-                delete parameters.chromInfo
-                delete parameters.dbkey
-                delete parameters.__input_ext
-                data.parameters = parameters
-            }
-
-            if (state === "error") {
-                const full = await showJob(job.id, { full: true })
-                data.error = (full.stderr || "").slice(0, 500)
-            }
-
-            statusList.push(data)
-        } catch {
+        const state = job.state
+        if (state === "deleted") {
             continue
         }
+
+        let url = ""
+        let ready = false
+        if (state !== "error") {
+            const entryPoints = await getEntryPoints(job.id)
+            const entryPoint = entryPoints.find((ep) => ep.job_id === job.id && ep.target)
+            if (entryPoint) {
+                url = `${galaxyUrl}${entryPoint.target}`
+                ready = await probeToolUrl(url)
+            }
+        }
+
+        const data = {
+            is_datafile_tool: job.is_datafile_tool || false,
+            is_extra_tool: job.is_extra_tool || false,
+            job_id: job.id,
+            tool_id: job.tool_id,
+            state,
+            url,
+            url_ready: ready
+        }
+
+        if (data.is_datafile_tool) {
+            const full = await showJob(job.id)
+            const parameters = { ...(full.params || {}) }
+            delete parameters.chromInfo
+            delete parameters.dbkey
+            delete parameters.__input_ext
+            data.parameters = parameters
+        }
+
+        if (state === "error") {
+            const full = await showJob(job.id, { full: true })
+            data.error = (full.stderr || "").slice(0, 500)
+        }
+
+        statusList.push(data)
     }
 
     return { jobs: statusList }
@@ -286,12 +455,28 @@ export async function fetchJobStatus(historyName, toolIds) {
 /**
  * Opens Galaxy's native SSE stream (Galaxy 26.1+, requires the admin flag
  * `enable_sse_updates: true` on the Galaxy side - see docs.galaxyproject.org
- * /en/latest/admin/sse_updates.html). Falls back to nothing if unsupported;
- * callers are expected to keep a slower poll running regardless, since even
- * Galaxy's own PR review noted the stream occasionally drops events.
+ * /en/latest/admin/sse_updates.html). It only fires `history_update` when a
+ * history/HDA/HDCA row changes and `entry_point_update` when an interactive
+ * tool's entry point becomes ready, so state changes of jobs without output
+ * datasets need a poll (see schedulePoll in stores/job.js). Callers must
+ * surface `onError` to the user.
+ * The browser retries transient drops itself (readyState CONNECTING, then
+ * `open` again); a non-retryable failure such as a 404 when SSE is disabled
+ * leaves readyState CLOSED.
  */
 export function openEventStream({ onEntryPointUpdate, onHistoryUpdate, onOpen, onError } = {}) {
     const source = new EventSource(`${galaxyUrl}/api/events/stream`, { withCredentials: true })
+
+    // Debug logging for the dev scream test - visible under the console's "Verbose" level.
+    source.addEventListener("open", () => console.debug("[galaxy sse] open"))
+    for (const type of ["entry_point_update", "history_update", "message"]) {
+        source.addEventListener(type, (event) => console.debug(`[galaxy sse] ${type}`, event.data))
+    }
+    source.addEventListener("error", () =>
+        console.debug(
+            `[galaxy sse] error (readyState: ${["CONNECTING", "OPEN", "CLOSED"][source.readyState]})`
+        )
+    )
 
     if (onOpen) source.addEventListener("open", onOpen)
     if (onEntryPointUpdate) {
