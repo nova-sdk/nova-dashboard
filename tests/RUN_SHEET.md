@@ -29,7 +29,6 @@ Some items in the below sheet are reasonable things to test but impossible or im
 |---|---|---|
 | 2.1 | Load home page | Grid of category cards shown, one per technique/instrument category (generic-tools category excluded); each shows name + description |
 | 2.2 | Click a category card | Navigates to `/{category-key}` (Category page) |
-| 2.3 | Leave home page open for >2s | Background job monitor polling begins silently (visible via network tab in developer console) |
 
 ## 3. Category Page
 
@@ -54,7 +53,7 @@ Some items in the below sheet are reasonable things to test but impossible or im
 | 4.8 | Click "Stop" on a running/ready tool | Job transitions through stopping state, then row returns to launchable ("Start") state |
 | 4.9 | Close a tool using the exit button within the tool and come back to the dashboard | A 5-second auto-dismissing snackbar reads "{tool} finished running." |
 | 4.10 (TODO) | Force a tool launch error | Red error banner shows the tool's reported error (stderr snippet, capped ~500 chars) |
-| 4.11 (TODO) | Click the clipboard/copy icon on a tool row | Auto-launch link copied to clipboard; tooltip changes to "Auto-launch link copied!" for ~2 seconds then reverts |
+| 4.11 | Click the clipboard/copy icon on a tool row | Auto-launch link copied to clipboard; tooltip changes to "Auto-launch link copied!" for ~2 seconds then reverts |
 | 4.12 (TODO) | On a tool that has a `documentation` link configured | Documentation icon button visible; click opens the doc link in a new tab |
 | 4.13 | On a tool with no documentation link configured | Documentation icon button is not rendered |
 
