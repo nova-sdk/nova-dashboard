@@ -277,15 +277,17 @@ export const useJobStore = defineStore("job", {
 
                 this.updateCalveraSpinner()
 
-                if (this.callback !== undefined && this.callback !== null) {
-                    this.callback()
-                }
-
                 // nextTick ensures that any updates to the UI from this monitoring loop have been committed.
                 // Setting this flag will allow users to launch tools, which should only be possible after
                 // the UI has been updated with the results of the initial monitoring.
                 nextTick(() => {
                     this.has_monitored = true
+
+                    // Run after has_monitored is set: an idle dashboard doesn't poll, so a callback
+                    // that bails out on the first run (e.g. LaunchView's autolaunch) may never run again.
+                    if (this.callback !== undefined && this.callback !== null) {
+                        this.callback()
+                    }
                 })
             } finally {
                 this.is_monitoring = false
