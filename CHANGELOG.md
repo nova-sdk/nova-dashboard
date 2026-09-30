@@ -1,3 +1,7 @@
+### nova-dashboard, 2.0.0
+
+* This dashboard has been rewritten as a Galaxy webapp (thanks to John Duggan).
+
 ### nova-dashboard, 1.1.1
 
 * Fix "HOME" link on 404 page to point to dashboard homepage rather than Galaxy (thanks to John Duggan).
