@@ -39,8 +39,8 @@ function sessionCsrfToken() {
 
 async function galaxyApi(path, options = {}) {
     const response = await fetch(`${galaxyUrl}${path}`, {
-        ...options,
         credentials: "include",
+        ...options,
         headers: {
             "Content-Type": "application/json",
             "session-csrf-token": sessionCsrfToken(),
@@ -79,7 +79,11 @@ function parseToolHelp(toolHelp) {
  * by category. Returns the same shape the old `/api/galaxy/tools/` view did.
  */
 export async function fetchTools() {
-    const galaxyTools = await (await galaxyApi("/api/tools?tool_help=true")).json()
+    // The tool panel is public. Omit credentials: Galaxy redirects requests carrying an expired or
+    // invalid session cookie to its login page, which would break the tool list for logged-out users.
+    const galaxyTools = await (
+        await galaxyApi("/api/tools?tool_help=true", { credentials: "omit" })
+    ).json()
     const toolJson = {}
     const mainCategories = []
 
@@ -397,11 +401,15 @@ export async function fetchJobStatus(historyName, toolIds) {
         let url = ""
         let ready = false
         if (state !== "error") {
-            const entryPoints = await getEntryPoints(job.id)
-            const entryPoint = entryPoints.find((ep) => ep.job_id === job.id && ep.target)
-            if (entryPoint) {
-                url = `${galaxyUrl}${entryPoint.target}`
-                ready = await probeToolUrl(url)
+            try {
+                const entryPoints = await getEntryPoints(job.id)
+                const entryPoint = entryPoints.find((ep) => ep.job_id === job.id && ep.target)
+                if (entryPoint) {
+                    url = `${galaxyUrl}${entryPoint.target}`
+                    ready = await probeToolUrl(url)
+                }
+            } catch (error) {
+                continue
             }
         }
 
