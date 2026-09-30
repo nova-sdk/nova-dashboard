@@ -16,6 +16,7 @@ export const useUserStore = defineStore("user", {
             initial_login_failed: false,
             is_admin: false,
             is_logged_in: false,
+            login_timer: null,
             ready: false
         }
     },
@@ -79,16 +80,20 @@ export const useUserStore = defineStore("user", {
         async getUser() {
             if (mockUserEmail && mockUserApiKey) {
                 this.mockUserLogin()
-            } else {
-                await this.getUserId()
+                return
+            }
+
+            await this.getUserId()
+            if (this.apiKey === "") {
                 this.getApiKey()
             }
 
-            if (this.id === "") {
-                window.setTimeout(() => {
-                    this.getUser()
-                }, this.delay)
-            }
+            // Keep checking even once logged in: getUserId reloads the page when the user logs in, logs out, or
+            // switches accounts in Galaxy. Job monitoring is event-driven, so nothing else will notice.
+            window.clearTimeout(this.login_timer)
+            this.login_timer = window.setTimeout(() => {
+                this.getUser()
+            }, this.delay)
         },
         mockUserLogin() {
             this.email = mockUserEmail

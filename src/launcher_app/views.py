@@ -67,53 +67,6 @@ def galaxy_is_admin(request: HttpRequest) -> HttpResponse:
 
 
 @require_POST
-def galaxy_launch(request: HttpRequest) -> HttpResponse:
-    try:
-        data = json.loads(request.body)
-        galaxy_manager = GalaxyManager(data.get("api_key", ""))
-
-        job_id = galaxy_manager.launch_job(data.get("tool_id", None), data.get("inputs", {}))
-
-        return JsonResponse({"id": job_id})
-    except Exception as e:
-        return _create_galaxy_error(e)
-
-
-@require_POST
-def galaxy_monitor(request: HttpRequest) -> JsonResponse:
-    try:
-        data = json.loads(request.body)
-        galaxy_manager = GalaxyManager(data.get("api_key", ""))
-
-        return JsonResponse({"jobs": galaxy_manager.monitor_jobs(data["tool_ids"])})
-    except Exception as e:
-        return _create_galaxy_error(e)
-
-
-@require_POST
-def galaxy_stop(request: HttpRequest) -> HttpResponse:
-    try:
-        data = json.loads(request.body)
-        galaxy_manager = GalaxyManager(data.get("api_key", ""))
-
-        galaxy_manager.stop_job(data.get("job_id", None))
-
-        return HttpResponse()
-    except Exception as e:
-        return _create_galaxy_error(e)
-
-
-@require_GET
-def galaxy_tools(request: HttpRequest) -> JsonResponse:
-    try:
-        galaxy_manager = GalaxyManager("")
-
-        return JsonResponse({"tools": galaxy_manager.get_tools()})
-    except Exception as e:
-        return _create_galaxy_error(e, tools={})
-
-
-@require_POST
 def report_issue(request: HttpRequest) -> HttpResponse:
     issue_manager = IssueManager()
 
