@@ -307,7 +307,7 @@ export async function getEntryPoints(jobId) {
  */
 export async function probeToolUrl(url) {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 100)
+    const timer = setTimeout(() => controller.abort(), 5000)
     try {
         const response = await fetch(url, { credentials: "include", signal: controller.signal })
         const text = await response.text()
@@ -318,7 +318,7 @@ export async function probeToolUrl(url) {
         console.debug(`[galaxy probe] ${url} -> ${response.status}, ready: ${ready}`)
         return ready
     } catch (error) {
-        // An AbortError means the 100ms budget ran out; a TypeError is usually a
+        // An AbortError means the 5s budget ran out; a TypeError is usually a
         // network or CORS failure (e.g. the tool is served from another origin).
         console.debug(`[galaxy probe] ${url} -> ${error.name}: ${error.message}`)
         return false
@@ -400,7 +400,7 @@ export async function fetchJobStatus(historyName, toolIds) {
 
         let url = ""
         let ready = false
-        if (state !== "error") {
+        if (state !== "error" && !ready) {
             try {
                 const entryPoints = await getEntryPoints(job.id)
                 const entryPoint = entryPoints.find((ep) => ep.job_id === job.id && ep.target)
