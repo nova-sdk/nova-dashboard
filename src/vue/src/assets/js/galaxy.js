@@ -300,6 +300,14 @@ export async function getEntryPoints(jobId) {
 }
 
 /**
+ * Interactive-tool URLs already seen serving their tool, keyed by job id. An
+ * entry point's target is fixed for the life of a job, so a job listed here
+ * skips both the entry-point lookup and the probe on later monitoring cycles.
+ * fetchJobStatus prunes it to the jobs Galaxy is still reporting.
+ */
+const readyToolUrls = new Map()
+
+/**
  * Probes whether an interactive tool's proxied URL is actually serving the
  * tool yet, replicating the body-sniffing check the removed Django
  * `GalaxyManager.monitor_jobs` used to do server-side (Galaxy's proxy returns 200 with a placeholder page
@@ -334,6 +342,7 @@ export async function probeToolUrl(url) {
  * resolves each one's interactive-tool URL/readiness. Returns the same shape
  * the old `/api/galaxy/monitor/` Django view did, so the Pinia store's existing
  * diffing logic (job.js) can stay untouched.
+ * Readiness probes are cached across calls - see `readyToolUrls`.
  */
 export async function fetchJobStatus(historyName, toolIds) {
     const dashboardHistoryId = await getHistoryId(historyName, { create: false })
@@ -389,6 +398,14 @@ export async function fetchJobStatus(historyName, toolIds) {
         allJobs.push({ ...job, is_extra_tool: true })
     }
 
+    // Forget jobs Galaxy no longer reports, so the cache can't outgrow the session.
+    const liveJobIds = new Set(allJobs.map((job) => job.id))
+    for (const jobId of readyToolUrls.keys()) {
+        if (!liveJobIds.has(jobId)) {
+            readyToolUrls.delete(jobId)
+        }
+    }
+
     // Unlike the old Django monitor_jobs, a failed per-job lookup is not skipped:
     // it fails the whole status fetch so the caller surfaces the error.
     const statusList = []
@@ -398,8 +415,10 @@ export async function fetchJobStatus(historyName, toolIds) {
             continue
         }
 
-        let url = ""
-        let ready = false
+        // A terminal job re-probes: its container may well be gone by now.
+        const cachedUrl = TERMINAL_STATES.includes(state) ? "" : readyToolUrls.get(job.id)
+        let url = cachedUrl || ""
+        let ready = Boolean(cachedUrl)
         if (state !== "error" && !ready) {
             try {
                 const entryPoints = await getEntryPoints(job.id)
@@ -407,6 +426,9 @@ export async function fetchJobStatus(historyName, toolIds) {
                 if (entryPoint) {
                     url = `${galaxyUrl}${entryPoint.target}`
                     ready = await probeToolUrl(url)
+                    if (ready) {
+                        readyToolUrls.set(job.id, url)
+                    }
                 }
             } catch (error) {
                 continue
