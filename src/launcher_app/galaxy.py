@@ -15,13 +15,6 @@ class GalaxyManager:
         if api_key:
             self.connection = Connection(settings.GALAXY_URL, api_key)
 
-    def is_admin(self) -> bool:
-        try:
-            with self.connection.connect() as connection:
-                return connection.galaxy_instance.users.get_current_user()["is_admin"]
-        except Exception:
-            return False
-
     def is_logged_in(self) -> bool:
         try:
             with self.connection.connect() as connection:

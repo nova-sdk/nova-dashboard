@@ -8,15 +8,12 @@
             </v-app-bar>
 
             <StatusPanel />
-            <v-banner
-                v-if="notification?.display && notification?.message"
-                class="bg-warning justify-center py-0"
-            >
+            <v-banner v-if="notificationMessage" class="bg-warning justify-center py-0">
                 <template v-slot:prepend>
                     <v-icon>mdi-information-outline</v-icon>
                 </template>
 
-                <v-banner-text v-html="notification?.message" />
+                <v-banner-text v-html="notificationMessage" />
             </v-banner>
 
             <v-fab
@@ -78,18 +75,17 @@ import MobileLayout from "@/layouts/MobileLayout.vue"
 import ToolDrawer from "@/components/ToolDrawer.vue"
 import { getTools } from "@/router"
 import { useJobStore } from "@/stores/job"
-import { useNotificationStore } from "@/stores/notification"
 import { useUserStore } from "@/stores/user"
 import StatusPanel from "@/components/StatusPanel.vue"
 
 const { mdAndUp } = useDisplay()
 const job = useJobStore()
 const { all_jobs, jobs, running } = storeToRefs(job)
-const notification = useNotificationStore()
 const user = useUserStore()
 const drawer = ref(false)
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const galaxyUrl = import.meta.env.VITE_GALAXY_URL
+const notificationMessage = import.meta.env.VITE_NOTIFICATION_MESSAGE
 
 const genericTools = computed(() => {
     const tools = getTools()

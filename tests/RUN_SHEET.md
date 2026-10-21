@@ -103,10 +103,7 @@ Some items in the below sheet are reasonable things to test but impossible or im
 
 | ID | Steps | Expected Result |
 |---|---|---|
-| 8.1 | Log in as a non-admin user | No notification bell icon in header (desktop); banner still shows if an admin has enabled one |
-| 8.2 | Log in as an admin user | Notification bell icon visible in header |
-| 8.3 | Open the bell menu, enter a message, enable the "Display?" switch, click Save | POST succeeds; banner with that message becomes visible to all users (including other sessions, within ~60s poll interval) |
-| 8.4 | Disable the "Display?" switch and Save | Banner disappears for all users within ~60s |
+| 8.1 | Open the dashboard | Banner shows message if an admin has enabled one |
 
 ## 9. Report Issue Form
 

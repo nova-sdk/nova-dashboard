@@ -2,6 +2,7 @@
 
 * This dashboard has been rewritten as a Galaxy webapp (thanks to John Duggan).
 * Identity provider status is now displayed in the status panel (thanks to John Duggan).
+* Banner messages are now provided by deployment configuration rather than a database (thanks to John Duggan).
 
 ### nova-dashboard, 1.1.1
 
