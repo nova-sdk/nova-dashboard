@@ -1,6 +1,7 @@
 ### nova-dashboard, 2.0.0
 
 * This dashboard has been rewritten as a Galaxy webapp (thanks to John Duggan).
+* Identity provider status is now displayed in the status panel (thanks to John Duggan).
 
 ### nova-dashboard, 1.1.1
 
