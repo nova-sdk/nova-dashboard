@@ -3,7 +3,6 @@
         <v-app-bar-title class="cursor-pointer flex-0-1 mr-1" @click="$router.push(basePath)">
             <v-img :src="`${basePath}logo_bw.png`" alt="NOVA Logo" width="200" />
         </v-app-bar-title>
-        <NotificationPanel v-show="is_admin" />
         <a :href="galaxyUrl" class="mx-2 text-decoration-none text-white" target="_blank">
             <v-tooltip activator="parent">{{ galaxyAlias }}</v-tooltip>
 
@@ -69,7 +68,6 @@ import ActiveToolsPanel from "@/components/ActiveToolsPanel.vue"
 import BugPanel from "@/components/BugPanel.vue"
 import CitationPanel from "@/components/CitationPanel.vue"
 import HelpPanel from "@/components/HelpPanel.vue"
-import NotificationPanel from "@/components/NotificationPanel.vue"
 import PreferencesPanel from "@/components/PreferencesPanel.vue"
 import { useUserStore } from "@/stores/user"
 
@@ -83,7 +81,7 @@ const props = defineProps({
 // Store references
 const route = useRoute()
 const user = useUserStore()
-const { email, is_admin, is_logged_in } = storeToRefs(user)
+const { email, is_logged_in } = storeToRefs(user)
 
 // General variables
 const baseLoginUrl = import.meta.env.VITE_LOGIN_URL

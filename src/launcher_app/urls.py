@@ -26,9 +26,7 @@ urlpatterns = [
     path("api/vuetify_config/", views.get_vuetify_config),
     path("api/status/alerts/", views.get_alerts),
     path("api/status/targets/", views.get_targets),
-    path("api/galaxy/is_admin/", views.galaxy_is_admin),
     path("api/issue/", views.report_issue),
-    path("api/notification/", views.notification),
 ]
 
 if settings.DEBUG:

@@ -1,7 +1,5 @@
-import Cookies from "js-cookie"
 import { defineStore } from "pinia"
 
-const basePath = import.meta.env.VITE_BASE_PATH
 const mockUserEmail = import.meta.env.VITE_MOCK_USER_EMAIL
 const mockUserApiKey = import.meta.env.VITE_MOCK_USER_API_KEY
 
@@ -14,27 +12,12 @@ export const useUserStore = defineStore("user", {
             email: null,
             id: "",
             initial_login_failed: false,
-            is_admin: false,
             is_logged_in: false,
             login_timer: null,
             ready: false
         }
     },
     actions: {
-        async getAdmin() {
-            const adminResponse = await fetch(`${basePath}api/galaxy/is_admin/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": Cookies.get("csrftoken")
-                },
-                body: JSON.stringify({
-                    api_key: this.apiKey
-                })
-            })
-            const adminData = await adminResponse.json()
-            this.is_admin = adminData.is_admin
-        },
         async getApiKey() {
             if (this.id === "") {
                 return
@@ -43,8 +26,6 @@ export const useUserStore = defineStore("user", {
             const apiKeyResponse = await fetch(`/api/users/${this.id}/api_key`)
             const apiKey = await apiKeyResponse.text()
             this.apiKey = apiKey.replace('"', "")
-
-            this.getAdmin()
         },
         async getUserId() {
             if (mockUserEmail && mockUserApiKey) {
@@ -102,7 +83,6 @@ export const useUserStore = defineStore("user", {
 
             window.setTimeout(() => {
                 this.apiKey = mockUserApiKey
-                this.getAdmin()
             }, this.delay)
         },
         getAutoopen() {

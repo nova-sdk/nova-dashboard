@@ -6,19 +6,15 @@ specified in urls.py file.
 
 import json
 from importlib.resources import open_text
-from typing import Any
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_GET, require_http_methods, require_POST
-from requests import ConnectionError
+from django.views.decorators.http import require_GET, require_POST
 from requests import request as proxy_request
 
 from .galaxy import GalaxyManager
 from .issue import IssueManager
-from .notification import NotificationManager
 from .status import StatusManager
 
 
@@ -45,27 +41,6 @@ def get_targets(request: HttpRequest) -> JsonResponse:
     return JsonResponse(status_manager.get_targets(), safe=False)
 
 
-def _create_galaxy_error(exception: Exception, **kwargs: Any) -> JsonResponse:
-    message = str(exception)
-    if isinstance(exception, json.JSONDecodeError):
-        message = f"Unable to fetch tool list, {settings.GALAXY_URL} may be restarting."
-    if isinstance(exception, ConnectionError) or "502 Bad Gateway" in message:
-        message = f"Unable to connect to Galaxy, {settings.GALAXY_URL} may be restarting."
-
-    return JsonResponse({"error": message, **kwargs}, status=500)
-
-
-@require_POST
-def galaxy_is_admin(request: HttpRequest) -> HttpResponse:
-    try:
-        data = json.loads(request.body)
-        galaxy_manager = GalaxyManager(data.get("api_key", ""))
-
-        return JsonResponse({"is_admin": galaxy_manager.is_admin()})
-    except Exception as e:
-        return _create_galaxy_error(e)
-
-
 @require_POST
 def report_issue(request: HttpRequest) -> HttpResponse:
     issue_manager = IssueManager()
@@ -80,26 +55,6 @@ def report_issue(request: HttpRequest) -> HttpResponse:
         return HttpResponseBadRequest("unable to process request")
 
     return JsonResponse({"url": url})
-
-
-@require_http_methods(["GET", "POST"])
-def notification(request: HttpRequest) -> HttpResponse:
-    notification_manager = NotificationManager()
-
-    if request.method == "GET":
-        return JsonResponse(notification_manager.get())
-
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-        galaxy_manager = GalaxyManager(data.get("api_key", ""))
-        if not galaxy_manager.is_admin():
-            raise PermissionDenied()
-
-        notification_manager.set(data)
-    except Exception:
-        return HttpResponseBadRequest("message parameter is missing")
-
-    return HttpResponse()
 
 
 @require_GET
