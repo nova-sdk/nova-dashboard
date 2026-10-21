@@ -17,7 +17,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://
 RUN apt update && apt install -y nginx
 
 # Install Node.js LTS & pnpm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash -
 RUN apt install -y nodejs
 ENV SHELL=bash
 RUN curl -fsSL https://get.pnpm.io/install.sh | sh -
