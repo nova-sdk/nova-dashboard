@@ -100,13 +100,6 @@ DATABASES = {
     }
 }
 
-# Prefix of tools to retrieve from Galaxy
-TOOL_PREFIX = os.environ.get("TOOL_PREFIX", "nova")
-# Tool ID that will always fail for testing error states.
-TEST_TOOL_ID = os.environ.get("TEST_TOOL_ID", "")
-# Extra Galaxy tools not using the prefix to retrieve from Galaxy
-EXTRA_TOOLS = os.environ.get("EXTRA_TOOLS", "").split(",")
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -130,7 +123,6 @@ SESSION_COOKIE_AGE = int(os.environ.get("SESSION_COOKIE_AGE", 60 * 60 * 24 * 14)
 
 # Galaxy settings
 GALAXY_URL = os.environ["GALAXY_URL"]
-GALAXY_HISTORY_NAME = os.environ.get("GALAXY_HISTORY_NAME", "launcher_history")
 
 # System status settings
 ALERTS_ENVIRONMENTS = json.loads(os.environ.get("ALERTS_ENVIRONMENTS", "[]"))
