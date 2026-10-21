@@ -27,10 +27,6 @@ urlpatterns = [
     path("api/status/alerts/", views.get_alerts),
     path("api/status/targets/", views.get_targets),
     path("api/galaxy/is_admin/", views.galaxy_is_admin),
-    path("api/galaxy/launch/", views.galaxy_launch),
-    path("api/galaxy/monitor/", views.galaxy_monitor),
-    path("api/galaxy/stop/", views.galaxy_stop),
-    path("api/galaxy/tools/", views.galaxy_tools),
     path("api/issue/", views.report_issue),
     path("api/notification/", views.notification),
 ]
