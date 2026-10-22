@@ -1,0 +1,182 @@
+# Load profile for the dashboard's own Django API and the static client nginx serves.
+#
+#   npx artillery run -e local artillery.yml
+#
+# Galaxy traffic is NOT covered here: since the front end talks to Galaxy directly,
+# that load is modeled separately in galaxy.yml.
+config:
+  target: http://localhost:8080
+  processor: ./processor.js
+
+  # Keep connections alive; browsers do, and without this the numbers measure TCP
+  # and TLS setup more than they measure the dashboard.
+  http:
+    timeout: 30
+    pool: 50
+
+  # arrivalRate is new sessions per second, and a polling session lives ~60s, so
+  # steady-state concurrency is roughly arrivalRate x 60 and the alerts endpoint
+  # sees roughly that many requests every 5s. The sustained phase below is about
+  # 120 concurrent dashboards (~24 req/s of Prometheus fan-out). Raise arrivalRate
+  # to look for the knee, but remember the status views hit the real Prometheus
+  # server once per request with no caching.
+  phases:
+    - name: warm_up
+      duration: 30
+      arrivalRate: 1
+    - name: ramp_up
+      duration: 120
+      arrivalRate: 1
+      rampTo: 2
+    - name: sustained
+      duration: 300
+      arrivalRate: 2
+      maxVusers: 250
+    - name: cool_down
+      duration: 30
+      arrivalRate: 1
+
+  plugins:
+    expect:
+      outputFormat: silent
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+  # The run exits non-zero if these are missed, so this file can gate a pipeline.
+  ensure:
+    thresholds:
+      - http.response_time.p95: 1500
+      - http.response_time.p99: 3000
+    maxErrorRate: 1
+
+  environments:
+    local:
+      target: http://localhost:8080
+    dev:
+      target: https://nova-dev.ornl.gov
+    test:
+      target: https://nova-test.ornl.gov
+    # Production (https://nova.ornl.gov) is intentionally absent. Add a target on
+    # the command line (-t) only with an agreed maintenance window: the status
+    # endpoints forward every request to the real Prometheus server.
+
+  defaults:
+    headers:
+      accept: application/json
+      user-agent: nova-dashboard-loadtest/artillery
+
+scenarios:
+  # A user opening the dashboard cold: HTML, bundles, config, then the status poll
+  # that StatusPanel.vue starts on mount and repeats every 5 seconds.
+  - name: dashboard_first_load
+    weight: 45
+    beforeScenario: setDefaults
+    flow:
+      - get:
+          url: "{{ base }}"
+          name: GET / (index.html)
+          headers:
+            accept: text/html
+          capture:
+            # group: 1 keeps just the URL; without it Artillery captures the
+            # whole match (src="...") and the follow-up request is invalid.
+            - regexp: 'src="([^"]+\.js)"'
+              group: 1
+              as: jsBundle
+              strict: false
+            - regexp: 'href="([^"]+\.css)"'
+              group: 1
+              as: cssBundle
+              strict: false
+          afterResponse: recordResponse
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "{{ jsBundle }}"
+          name: GET /assets/*.js
+          ifTrue: hasJsBundle
+          headers:
+            accept: "*/*"
+          afterResponse: recordResponse
+
+      - get:
+          url: "{{ cssBundle }}"
+          name: GET /assets/*.css
+          ifTrue: hasCssBundle
+          headers:
+            accept: "*/*"
+          afterResponse: recordResponse
+
+      - get:
+          url: "{{ base }}api/vuetify_config/"
+          name: GET /api/vuetify_config/
+          afterResponse: captureCsrfToken
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+      - get:
+          url: "{{ base }}api/status/targets/"
+          name: GET /api/status/targets/
+          afterResponse: checkTargets
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "{{ base }}api/status/alerts/"
+          name: GET /api/status/alerts/
+          afterResponse: checkAlerts
+          expect:
+            - statusCode: 200
+
+      # Three further polling cycles, i.e. a user who glances at the dashboard
+      # for ~15s and leaves.
+      - loop:
+          - think: 5
+          - get:
+              url: "{{ base }}api/status/alerts/"
+              name: GET /api/status/alerts/
+              afterResponse: checkAlerts
+        count: 3
+
+  # A tab left open on a wall display. This is the dominant steady-state load:
+  # every poll makes the Django worker call Prometheus synchronously.
+  - name: status_polling_session
+    weight: 40
+    beforeScenario: setDefaults
+    flow:
+      - get:
+          url: "{{ base }}api/status/targets/"
+          name: GET /api/status/targets/
+          afterResponse: checkTargets
+      - loop:
+          - get:
+              url: "{{ base }}api/status/alerts/"
+              name: GET /api/status/alerts/
+              afterResponse: checkAlerts
+          - think: 5
+        count: 12
+
+  # The bug report form. The API key is deliberately invalid: the view checks it
+  # against Galaxy first and answers 400, so this loads the Galaxy round trip
+  # without filing anything in GitLab. See issue-submit.yml for the real path.
+  - name: issue_form_auth_rejection
+    weight: 15
+    beforeScenario: setDefaults
+    flow:
+      - get:
+          url: "{{ base }}api/vuetify_config/"
+          name: GET /api/vuetify_config/
+          afterResponse: captureCsrfToken
+      - think: 10
+      - post:
+          url: "{{ base }}api/issue/"
+          name: POST /api/issue/ (rejected)
+          beforeRequest: addCsrfHeaders
+          json:
+            api_key: loadtest-invalid-key
+            email: loadtest@example.invalid
+            topic: "[load test] not a real report"
+            description: "Submitted by loadtest/artillery.yml with an invalid API key."
+          afterResponse: checkIssueRejected

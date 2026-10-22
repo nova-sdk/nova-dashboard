@@ -42,6 +42,17 @@ pixi run ./manage.py runserver_plus --insecure 0.0.0.0:8080
 
 Pixi will create a `.pixi` folder containing a virtual environment for this project. Please configure your IDE to use this environment.
 
+## Load testing
+
+Artillery load profiles for the dashboard API, the static client and the Galaxy calls the browser makes
+directly live in `loadtest/`. See [loadtest/README.md](loadtest/README.md) for how to run them.
+
+```bash
+cd loadtest
+pnpm install
+pnpm run load:local
+```
+
 ## Docker
 
 ### Build the image
