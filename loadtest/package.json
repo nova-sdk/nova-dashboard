@@ -1,0 +1,19 @@
+{
+    "name": "nova-dashboard-loadtest",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Artillery load tests for the NOVA dashboard",
+    "type": "commonjs",
+    "scripts": {
+        "load": "artillery run artillery.yml",
+        "load:local": "artillery run -e local artillery.yml",
+        "load:dev": "artillery run -e dev artillery.yml",
+        "load:test": "artillery run -e test artillery.yml",
+        "load:smoke": "artillery run -e local --overrides '{\"config\":{\"phases\":[{\"duration\":20,\"arrivalRate\":1,\"name\":\"smoke\"}]}}' artillery.yml",
+        "load:galaxy": "artillery run galaxy.yml",
+        "report": "node report.js"
+    },
+    "devDependencies": {
+        "artillery": "^2.0.26"
+    }
+}

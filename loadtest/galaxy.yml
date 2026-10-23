@@ -1,0 +1,106 @@
+# Load profile for the Galaxy API calls the dashboard's browser code makes directly
+# (src/vue/src/assets/js/galaxy.js). Since the Django Galaxy proxy was removed, this
+# traffic never touches the dashboard server, so it needs its own run:
+#
+#   LOAD_GALAXY_API_KEY=<key> npx artillery run -t https://ndip-test.ornl.gov galaxy.yml
+#
+# Read-only by design. Tool launches (POST /api/tools) are deliberately NOT included:
+# each one starts a real container on real compute.
+config:
+  target: https://ndip-test.ornl.gov
+  processor: ./processor.js
+
+  http:
+    timeout: 30
+    pool: 50
+
+  phases:
+    - name: warm_up
+      duration: 30
+      arrivalRate: 1
+    - name: ramp_up
+      duration: 120
+      arrivalRate: 1
+      rampTo: 5
+    - name: sustained
+      duration: 180
+      arrivalRate: 5
+
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+  ensure:
+    thresholds:
+      - http.response_time.p95: 3000
+    maxErrorRate: 5
+
+  defaults:
+    headers:
+      accept: application/json
+      user-agent: nova-dashboard-loadtest/artillery
+
+scenarios:
+  # fetchTools(): the tool panel every visitor pulls, logged in or not. It is the
+  # single largest response the dashboard depends on.
+  - name: galaxy_tool_panel
+    weight: 50
+    beforeScenario: setDefaults
+    flow:
+      - get:
+          url: /api/tools?tool_help=true
+          name: GET /api/tools (tool panel)
+          afterResponse: checkToolPanel
+
+  # fetchJobStatus(): the monitoring loop in stores/job.js. It fires on every SSE
+  # event and on a 500ms poll timer, and each cycle is four job queries, so a
+  # handful of users with tools open generate a lot of requests.
+  - name: galaxy_job_monitoring
+    weight: 50
+    beforeScenario: setDefaults
+    flow:
+      # Without an API key there is nothing to monitor, so every step below is
+      # skipped and the scenario is a no-op.
+      - get:
+          url: /api/histories
+          name: GET /api/histories
+          ifTrue: hasGalaxyKey
+          beforeRequest: addGalaxyAuth
+          afterResponse: captureHistoryId
+
+      - loop:
+          - get:
+              url: /api/jobs?history_id={{ historyId }}&state=new&state=queued&state=running&state=waiting&state=paused
+              name: GET /api/jobs (dashboard history, non-terminal)
+              ifTrue: hasHistoryId
+              beforeRequest: addGalaxyAuth
+              afterResponse: recordResponse
+              capture:
+                - json: "$[0].id"
+                  as: jobId
+                  strict: false
+
+          - get:
+              url: /api/jobs?state=running
+              name: GET /api/jobs (all running)
+              ifTrue: hasHistoryId
+              beforeRequest: addGalaxyAuth
+              afterResponse: recordResponse
+
+          - get:
+              url: /api/jobs?history_id={{ historyId }}&limit=5&order_by=create_time&state=ok&state=error&state=deleted&state=deleting
+              name: GET /api/jobs (recent terminal)
+              ifTrue: hasHistoryId
+              beforeRequest: addGalaxyAuth
+              afterResponse: recordResponse
+
+          - get:
+              url: /api/entry_points?job_id={{ jobId }}
+              name: GET /api/entry_points
+              ifTrue: hasJobId
+              beforeRequest: addGalaxyAuth
+              afterResponse: recordResponse
+
+          # stores/job.js polls at 500ms; this keeps the same cadence.
+          - think: 0.5
+        count: 20
