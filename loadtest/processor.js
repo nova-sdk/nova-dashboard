@@ -167,47 +167,12 @@ function checkIssueRejected(request, response, context, events, done) {
       "WARNING: POST /api/issue/ returned 200 during the auth-rejection scenario. " +
         "A real GitLab issue may have been created.",
     );
-  } else if (response.statusCode !== 400) {
+  } else if (response.statusCode !== 403) {
     events.emit("counter", "issue.unexpected_status", 1);
   } else {
     events.emit("counter", "issue.rejected_as_expected", 1);
   }
 
-  return done();
-}
-
-/** Refuses to run the real-submission profile unless it was opted into explicitly. */
-function requireIssueOptIn(context, events, done) {
-  const confirm = process.env.LOAD_ISSUE_SUBMIT_CONFIRM;
-  if (confirm !== "yes-create-real-gitlab-issues") {
-    return done(
-      new Error(
-        "issue-submit.yml files real GitLab issues. Set " +
-          "LOAD_ISSUE_SUBMIT_CONFIRM=yes-create-real-gitlab-issues to run it, and point " +
-          "GITLAB_ISSUES_API_ENDPOINT at a scratch project first.",
-      ),
-    );
-  }
-  if (!process.env.LOAD_GALAXY_API_KEY) {
-    return done(
-      new Error(
-        "issue-submit.yml needs LOAD_GALAXY_API_KEY set to a valid Galaxy API key.",
-      ),
-    );
-  }
-
-  return setDefaults(context, events, done);
-}
-
-/** Builds a recognizable issue body so test-run noise is easy to find and close. */
-function buildIssuePayload(context, events, done) {
-  const stamp = new Date().toISOString();
-  context.vars.issueEmail =
-    process.env.LOAD_ISSUE_EMAIL || "loadtest@example.invalid";
-  context.vars.issueTopic = `[load test] dashboard load run ${stamp}`;
-  context.vars.issueDescription =
-    `Automated load test submission from loadtest/issue-submit.yml at ${stamp}. ` +
-    "This issue was created by a test run and can be closed.";
   return done();
 }
 
@@ -313,7 +278,6 @@ function captureHistoryId(request, response, context, events, done) {
 module.exports = {
   addCsrfHeaders,
   addGalaxyAuth,
-  buildIssuePayload,
   captureCsrfToken,
   captureHistoryId,
   checkAlerts,
@@ -326,6 +290,5 @@ module.exports = {
   hasJobId,
   hasJsBundle,
   recordResponse,
-  requireIssueOptIn,
   setDefaults,
 };

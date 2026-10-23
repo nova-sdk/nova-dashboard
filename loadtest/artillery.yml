@@ -160,7 +160,7 @@ scenarios:
 
   # The bug report form. The API key is deliberately invalid: the view checks it
   # against Galaxy first and answers 400, so this loads the Galaxy round trip
-  # without filing anything in GitLab. See issue-submit.yml for the real path.
+  # without filing anything in GitLab.
   - name: issue_form_auth_rejection
     weight: 15
     beforeScenario: setDefaults
