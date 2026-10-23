@@ -10,9 +10,8 @@
         "load:dev": "artillery run -e dev artillery.yml",
         "load:test": "artillery run -e test artillery.yml",
         "load:smoke": "artillery run -e local --overrides '{\"config\":{\"phases\":[{\"duration\":20,\"arrivalRate\":1,\"name\":\"smoke\"}]}}' artillery.yml",
-        "load:report": "artillery run -e local -o results.json artillery.yml && artillery report results.json",
         "load:galaxy": "artillery run galaxy.yml",
-        "load:issue": "artillery run issue-submit.yml"
+        "report": "node report.js"
     },
     "devDependencies": {
         "artillery": "^2.0.26"

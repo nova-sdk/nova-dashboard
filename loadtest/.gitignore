@@ -1,4 +1,5 @@
 node_modules/
 results.json
-results.html
-*.json.gz
+*.html
+*.json
+!package.json

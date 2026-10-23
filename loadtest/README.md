@@ -23,10 +23,10 @@ pnpm install
 ## Running
 
 ```bash
+pnpm run load:smoke    # 20s shakeout run, for checking the profile itself
 pnpm run load:local    # http://localhost:8080
 pnpm run load:dev      # https://nova-dev.ornl.gov
 pnpm run load:test     # https://nova-test.ornl.gov
-pnpm run load:smoke    # 20s shakeout run, for checking the profile itself
 ```
 
 Any other target:
@@ -40,8 +40,15 @@ Please don't run this against a production system, though. -_-
 An HTML report:
 
 ```bash
-pnpm run load:report   # writes results.json, then results.html
+pnpm run report results.json              # -> results.html
+pnpm run report ndip-dev.json -o run.html
+pnpm run report results.json --p95 2000 --p99 4000   # pass/fail chips for a different target
 ```
+
+It shows summary tiles, response-time percentiles and request rate over the run, per-endpoint p95/p99, 4xx/5xx
+over time, and the scenario counters from `processor.js`. Every chart has a "Show data table" twin, so nothing
+is readable only on hover. The p95/p99 options only move the pass/fail chips; they default to the `ensure`
+thresholds in `artillery.yml` (1500 ms / 3000 ms), so pass `--p95`/`--p99` when reporting on `galaxy.yml`.
 
 If you need to take a quick break from work:
 
