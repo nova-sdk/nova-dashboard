@@ -42,6 +42,8 @@ pixi run ./manage.py runserver_plus --insecure 0.0.0.0:8080
 
 Pixi will create a `.pixi` folder containing a virtual environment for this project. Please configure your IDE to use this environment.
 
+Maintaining healthy interaction between this dashboard and Galaxy is critical to the long-term health of this project. Please read, refer to, and help maintain [docs/galaxy-interactions.md](docs/galaxy-interactions.md) when working to ensure that we manage interaction with Galaxy in a stable manner.
+
 ## Load testing
 
 Artillery load profiles for the dashboard API, the static client and the Galaxy calls the browser makes
