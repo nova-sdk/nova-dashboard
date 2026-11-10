@@ -293,6 +293,12 @@ export async function showJob(jobId, { full = false } = {}) {
     return await response.json()
 }
 
+/** Dataset details -> GET /api/datasets/{id}. `misc_info` carries Galaxy's failure message. */
+export async function showDataset(datasetId) {
+    const response = await galaxyApi(`/api/datasets/${datasetId}`)
+    return await response.json()
+}
+
 /** Interactive tool entry points for a job -> GET /api/entry_points?job_id=. */
 export async function getEntryPoints(jobId) {
     const response = await galaxyApi(`/api/entry_points?job_id=${jobId}`)
@@ -306,6 +312,39 @@ export async function getEntryPoints(jobId) {
  * fetchJobStatus prunes it to the jobs Galaxy is still reporting.
  */
 const readyToolUrls = new Map()
+
+/**
+ * Galaxy's reason for a failed job, as the Galaxy UI shows it.
+ *
+ * A job that dies before it is ever dispatched - a TPV rule denying the user
+ * permission to run the tool, say - has no streams at all: Galaxy's
+ * `JobWrapper.fail()` calls `set_streams("", "", ...)`, so `stderr` is empty.
+ * It does copy the message onto every output dataset's `info`, which is what
+ * the Galaxy UI displays and which reaches us as `misc_info`. (It also sets
+ * `job.info`, but `Job.to_dict` only emits that for the admin job list, so the
+ * jobs API never returns it.)
+ *
+ * Takes the `?full=true` job body, whose `outputs` already name the datasets.
+ */
+async function jobErrorText(full) {
+    if (full.stderr) {
+        return full.stderr
+    }
+
+    const output = Object.values(full.outputs || {}).find((entry) => entry?.src === "hda")
+    if (!output) {
+        return ""
+    }
+
+    try {
+        const dataset = await showDataset(output.id)
+        return dataset.misc_info || ""
+    } catch (error) {
+        // A purged or otherwise unreadable dataset must not break the monitoring loop.
+        console.debug(`[galaxy] no misc_info for dataset ${output.id}: ${error.message}`)
+        return ""
+    }
+}
 
 /**
  * Probes whether an interactive tool's proxied URL is actually serving the
@@ -456,7 +495,7 @@ export async function fetchJobStatus(historyName, toolIds) {
 
         if (state === "error") {
             const full = await showJob(job.id, { full: true })
-            data.error = (full.stderr || "").slice(0, 500)
+            data.error = ((await jobErrorText(full)) || "").slice(0, 500)
         }
 
         statusList.push(data)

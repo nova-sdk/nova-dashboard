@@ -17,11 +17,12 @@ Cycle in the below table refers to a single iteration of the monitoring loop.
 | G6 | `POST /api/tools` | once per tool launch |
 | G7 | `GET /api/jobs?…` | ×5 per cycle (galaxy.js:354-381) |
 | G8 | `GET /api/jobs/{id}` | 100 ms in `waitForJob`; per datafile job per cycle |
-| G9 | `GET /api/jobs/{id}?full=true` | once per errored job per cycle (stderr) |
+| G9 | `GET /api/jobs/{id}?full=true` | once per errored job per cycle (stderr, outputs) |
 | G10 | `DELETE /api/jobs/{id}` | once per stop |
 | G11 | `GET /api/entry_points?job_id=` | once per non-terminal job per cycle until job URL is found |
 | G12 | `GET {entry point target}` | once per non-terminal job per cycle until job URL returns 200 |
 | G13 | `GET /api/events/stream` (SSE) | once when `startMonitor` is called |
+| G14 | `GET /api/datasets/{id}` | once per errored job with empty stderr, per cycle |
 
 ## Browser → Django → Galaxy
 
