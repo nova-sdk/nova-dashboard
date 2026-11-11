@@ -37,6 +37,19 @@ def icon_control(scope: Union[Page, Locator], icon_class: str) -> Locator:
     return scope.locator(f"button:has(i.{icon_class}), a:has(i.{icon_class})")
 
 
+def content_card(page: Page) -> Locator:
+    """Locate the card a route renders its content in, excluding the Tools drawer.
+
+    Scoping matters because a closed ``v-navigation-drawer`` is translated off-canvas
+    rather than hidden, so Playwright still gives it a bounding box and counts it as
+    visible. The drawer repeats headings the routes use - "Prototype Tools" most
+    notably - so an unscoped ``get_by_text`` matches the drawer's copy as well and
+    trips strict mode. The drawer holds no ``v-container``/``v-card`` of its own,
+    so this selector cannot reach into it.
+    """
+    return page.locator(".v-container .v-card")
+
+
 def tool_row(page: Page, tool_name: str) -> Locator:
     """Locate a single ToolListItem row by its tool name.
 

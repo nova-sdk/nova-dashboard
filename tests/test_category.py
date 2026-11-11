@@ -5,7 +5,7 @@ import re
 from playwright.sync_api import expect
 
 from tests.conftest import Dashboard
-from tests.support.locators import tool_row
+from tests.support.locators import content_card, tool_row
 from tests.support.tools import panel_with_empty_category
 
 
@@ -33,7 +33,10 @@ def test_3_3_prototype_tools_render_in_their_own_section(dashboard: Dashboard) -
     """3.3 A category's prototype tools appear under a separate Prototype Tools heading."""
     page = dashboard.open("spectroscopy")
 
-    expect(page.get_by_text("Prototype Tools")).to_be_visible()
+    # Scoped to the category's own card: the Tools drawer renders a "Prototype Tools"
+    # subheader too, and because a closed drawer sits off-canvas rather than hidden,
+    # an unscoped locator matches both the moment the category finishes rendering.
+    expect(content_card(page).get_by_text("Prototype Tools")).to_be_visible()
     expect(tool_row(page, "Prototype Fitter")).to_be_visible()
 
 
