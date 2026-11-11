@@ -44,6 +44,43 @@ Pixi will create a `.pixi` folder containing a virtual environment for this proj
 
 Maintaining healthy interaction between this dashboard and Galaxy is critical to the long-term health of this project. Please read, refer to, and help maintain [docs/galaxy-interactions.md](docs/galaxy-interactions.md) when working to ensure that we manage interaction with Galaxy in a stable manner.
 
+## Testing
+
+The test suite is a Playwright-driven set of user interface tests written in Python, under
+[`tests/`](tests/). They drive the real Vue client in a headless browser and mock every
+backend call at the browser's network layer, so **no Django server, database, Galaxy,
+Prometheus or GitLab instance is needed** - and nothing the tests do can reach a real
+service.
+
+Each test maps to a case in [`tests/RUN_SHEET.md`](tests/RUN_SHEET.md), the manual
+checklist they automate; test names carry the run-sheet ID (`test_4_5_...` covers 4.5).
+
+Install the browser once, then run them:
+
+```bash
+pixi run playwright install chromium
+pixi run pytest
+```
+
+Useful variations:
+
+```bash
+pixi run pytest -k "launch"        # one area
+pixi run pytest --headed           # watch it in a real browser window
+pixi run pytest --headed --slowmo 500
+pixi run pytest --tracing on       # write a trace to test-results/ for `playwright show-trace`
+```
+
+The suite starts its own Vite dev server on port 5173 in `user-interface` mode and shuts
+it down afterwards. If something is already serving that port - your own `pnpm run dev`,
+say - it reuses it instead which will likely cause confusing failures.
+
+Configuration for that mode lives in [`.env.user-interface`](.env.user-interface), which is
+committed and contains no secrets. Two of its values are deliberate: `VITE_BASE_PATH=/`
+(the header hides its Login button via a `/launch` path check that only matches at the
+root), and empty `VITE_MOCK_USER_*` (setting those makes the client skip `/api/whoami`
+entirely, which would make the logged-out state impossible to test).
+
 ## Load testing
 
 Artillery load profiles for the dashboard API, the static client and the Galaxy calls the browser makes
