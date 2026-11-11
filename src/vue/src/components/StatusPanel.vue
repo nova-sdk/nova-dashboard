@@ -32,13 +32,13 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue"
 import AlertManager from "@/assets/js/alerts"
 import ServiceStatus from "@/components/ServiceStatus.vue"
 
 const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 
-const alertManager = new AlertManager()
+const alertManager = reactive(new AlertManager())
 const bannerStatus = ref("success")
 let pollInterval = null
 

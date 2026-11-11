@@ -167,3 +167,7 @@ junit.xml
 
 tools.json
 prototype_tools.json
+
+# Playwright user interface suite artifacts
+test-results/
+playwright-report/

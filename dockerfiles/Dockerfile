@@ -36,10 +36,22 @@ RUN pixi install
 SHELL [ "pixi", "run", "--manifest-path", "/opt/run/django" ]
 ENTRYPOINT [ "pixi", "run", "--manifest-path", "/opt/run/django" ]
 
+# The client is installed at /opt/run/vue, but vite.config.js resolves
+# `../../pyproject.toml` and `envDir: "../.."`, which only point at the repo from
+# /opt/run/django/src/vue - and that copy has no node_modules, since .dockerignore keeps
+# it out of the build context. Linking the two gives one directory that satisfies both,
+# so the suite runs here exactly as it does locally.
+RUN ln -s /opt/run/vue/node_modules /opt/run/django/src/vue/node_modules
+
+# Browsers live outside $HOME so that the image still works when run as a non-root user.
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+RUN playwright install --with-deps chromium
+
 WORKDIR /opt/run/django
 RUN chmod og+rwX -R /pnpm
 RUN chmod og+rwX -R /opt/run/django
 RUN chmod og+rwX -R /opt/run/vue
+RUN chmod og+rwX -R /opt/playwright
 
 
 FROM source AS run
