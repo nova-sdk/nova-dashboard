@@ -2,13 +2,8 @@
 
 The banner polls every 5s, so a test changes :class:`StatusController` state and then
 advances the mocked clock past a poll.
-
-7.6 and 7.7 are a pair: "configured, so the button shows" and "not configured, so it
-does not". Only the second state is reachable today, so 7.6 is marked xfail - see its
-docstring for why.
 """
 
-import pytest
 from playwright.sync_api import expect
 
 from tests.conftest import Dashboard
@@ -77,43 +72,8 @@ def test_7_5_hover_card_lists_every_service_group(dashboard: Dashboard) -> None:
         expect(page.get_by_text(name, exact=False).first).to_be_visible()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "MONITORING_URL never reaches the browser: StatusPanel.vue renders the button from "
-        "alertManager.monitoringUrl, but AlertManager (assets/js/alerts.js) never assigns that "
-        "property and Django exposes the setting to no endpoint, so the button cannot render "
-        "whatever the deployment is configured with. Wiring it up is what this test is waiting "
-        "for; whoever does that should also give this test a way to configure the URL, then "
-        "drop this marker."
-    ),
-)
-def test_7_6_monitoring_details_button_links_out(dashboard: Dashboard) -> None:
-    """7.6 With monitoring configured, the card offers a "View Monitoring Details" button."""
-    page = dashboard.open("")
-
-    status_banner(page).hover()
-    expect(page.get_by_text("NDIP System Status")).to_be_visible()
-
-    expect(page.get_by_role("link", name="View Monitoring Details")).to_be_visible()
-
-
-def test_7_7_monitoring_details_button_is_absent(dashboard: Dashboard) -> None:
-    """7.7 With no monitoring URL provided, no "View Monitoring Details" button is shown.
-
-    This is the half of the 7.6/7.7 pair that the suite can actually set up, since nothing
-    delivers a monitoring URL to the client.
-    """
-    page = dashboard.open("")
-
-    status_banner(page).hover()
-    expect(page.get_by_text("NDIP System Status")).to_be_visible()
-
-    expect(page.get_by_role("link", name="View Monitoring Details")).to_have_count(0)
-
-
-def test_7_8_compute_resources_breaks_down_per_node(dashboard: Dashboard) -> None:
-    """7.8 Compute Resources reports how many of its nodes are up."""
+def test_7_6_compute_resources_breaks_down_per_node(dashboard: Dashboard) -> None:
+    """7.6 Compute Resources reports how many of its nodes are up."""
     page = dashboard.open("")
 
     dashboard.status.set_alerts(alert(severity="critical", alias=COMPUTE_NODES[0]))
@@ -128,8 +88,8 @@ def test_7_8_compute_resources_breaks_down_per_node(dashboard: Dashboard) -> Non
         expect(page.get_by_text(node, exact=True).first).to_be_visible()
 
 
-def test_7_9_instrument_data_drills_down_to_mounts(dashboard: Dashboard) -> None:
-    """7.9 Instrument Data drills from compute node down to per-instrument mounts."""
+def test_7_7_instrument_data_drills_down_to_mounts(dashboard: Dashboard) -> None:
+    """7.7 Instrument Data drills from compute node down to per-instrument mounts."""
     page = dashboard.open("")
 
     status_banner(page).hover()
@@ -143,8 +103,8 @@ def test_7_9_instrument_data_drills_down_to_mounts(dashboard: Dashboard) -> None
     expect(page.get_by_text("SNS-CORELLI", exact=True).first).to_be_visible()
 
 
-def test_7_10_nested_counts_update_live(dashboard: Dashboard) -> None:
-    """7.10 Regression: nested counts update while the card stays open.
+def test_7_8_nested_counts_update_live(dashboard: Dashboard) -> None:
+    """7.8 Regression: nested counts update while the card stays open.
 
     ``AlertManager`` mutates its ``Service`` objects in place, so ``StatusPanel.vue`` has
     to wrap it in ``reactive()`` for the nested ``ServiceStatus`` rows to re-render. This

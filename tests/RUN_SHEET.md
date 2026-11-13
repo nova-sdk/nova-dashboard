@@ -16,44 +16,6 @@ I have recently been given access to a Claude Code subscription and am testing i
 
 Some items in the below sheet are reasonable things to test but impossible or impractical currently. I've added a TODO flag next to their IDs.
 
-## Still manual
-
-These cannot be covered by the automated suite, which mocks every backend call and never
-reaches a real service:
-
-- **1.2, 1.3, 1.5, 5.2, 5.11** — the real OAuth round trip against Galaxy. The suite
-  asserts the login/logout URLs the dashboard builds, but does not follow them.
-- **4.6, 4.7, 4.12** — what the opened tool actually renders in the new tab.
-- **4.9, 6.4** — a tool genuinely launched from inside another tool.
-- **7.2, 7.3, 7.8–7.11** — verification against a real Prometheus, rather than mocked
-  alert payloads.
-- **9.5, 9.6** — that a GitLab issue is really created.
-- **4.11 (TODO)** — clipboard contents. The copy button itself is exercised, but reading
-  the OS clipboard back is out of scope.
-
-## Changes since this sheet was written
-
-- **Section 8 (System Notification Banner) has been removed.** `NotificationPanel.vue`,
-  the `/api/notification/` endpoint and the admin `is_admin` check are all gone; the
-  banner is now set from the build-time `VITE_NOTIFICATION_MESSAGE` environment variable
-  (commit `e697983`), so there is no admin who can enable one and nothing left to check by
-  hand. Because the message is baked in at build time, the automated suite deliberately
-  leaves it unset — a banner on every page would sit in the way of other layout
-  assertions. Numbering of sections 9-14 is unchanged, since test names map to these IDs.
-  11.1 and 11.2 lost their "notification bell if admin" mentions for the same reason.
-- **7.5 now lists all seven service groups.** `assets/js/alerts.js` also builds
-  "Authentication Services", between Infrastructure and Instrument Data;
-  `test_7_5_hover_card_lists_every_service_group` asserts all seven.
-- **7.6 cannot pass as written, and is marked `xfail`.** `StatusPanel.vue` renders its
-  "View Monitoring Details" button from `alertManager.monitoringUrl`, but `AlertManager`
-  never assigns that property and Django exposes `MONITORING_URL` to no endpoint, so the
-  button cannot render whatever a deployment configures. The marker is `strict`, so if
-  someone wires the URL through, the test fails as `XPASS(strict)` rather than quietly
-  passing — the signal to give it a way to set the URL and drop the marker. 7.7 (button
-  absent with no URL provided) is the half of the pair that does run.
-- **7.10 is fixed.** `StatusPanel.vue` now wraps `AlertManager` in `reactive()`, and
-  `test_7_10_nested_counts_update_live` guards the regression.
-
 ---
 
 ## 1. Login / Logout / Session
@@ -136,12 +98,10 @@ reaches a real service:
 | 7.3 | Induce/simulate a `critical`-severity alert | Banner turns red/error: "Some {Galaxy alias} systems are experiencing outages. Hover for details." |
 | 7.4 | Make the monitoring endpoint itself unreachable | Banner is hidden entirely (grey/"unavailable" state suppresses the banner, per code) — confirm no banner is shown and no console errors break the page |
 | 7.5 | Hover over the status banner | Card opens showing "{Galaxy alias} System Status" title, a `ServiceStatus` list for all seven groups: Infrastructure, Authentication Services, Instrument Data, ONCat, Compute Resources, Live Data, Documentation |
-| 7.6 (blocked) | With `MONITORING_URL` configured, hover the banner | "View Monitoring Details" button is present and links out correctly. **Cannot pass today** — see "Changes since this sheet was written"; automated as a strict `xfail`. |
-| 7.7 | With `MONITORING_URL` not configured, hover the banner | "View Monitoring Details" button is absent |
-| 7.8 | Expand "Compute Resources" group in the hover card | Shows per-compute-node breakdown with a count like "(3 of 4 up)" |
-| 7.9 | Expand "Instrument Data" group | Shows per-compute-node breakdown of instrument mount status (e.g. HFIR-CG1D, SNS-CORELLI, SNS-VULCAN, etc.) with an "(N of M up)" count |
-| 7.10 | **Regression:** With the hover card open, wait through a 5s poll cycle while an alert's status changes (e.g. a node flips from down to up) | Per-node/sub-list counts and icons update live without needing to close/reopen the card *(previously reported reactivity bug — verify carefully, tracked in branch `66-system-status-sublists-aren-t-fully-reactive`)* |
-| 7.11 | Trigger a slow tool launch (>10s, see 4.4) while a status alert is firing | Warning tooltip on the tool row explicitly references checking the status banner |
+| 7.6 | Expand "Compute Resources" group in the hover card | Shows per-compute-node breakdown with a count like "(3 of 4 up)" |
+| 7.7 | Expand "Instrument Data" group | Shows per-compute-node breakdown of instrument mount status (e.g. HFIR-CG1D, SNS-CORELLI, SNS-VULCAN, etc.) with an "(N of M up)" count |
+| 7.8 | **Regression:** With the hover card open, wait through a 5s poll cycle while an alert's status changes (e.g. a node flips from down to up) | Per-node/sub-list counts and icons update live without needing to close/reopen the card *(previously reported reactivity bug — verify carefully, tracked in branch `66-system-status-sublists-aren-t-fully-reactive`)* |
+| 7.9 | Trigger a slow tool launch (>10s, see 4.4) while a status alert is firing | Warning tooltip on the tool row explicitly references checking the status banner |
 
 ## 9. Report Issue Form
 

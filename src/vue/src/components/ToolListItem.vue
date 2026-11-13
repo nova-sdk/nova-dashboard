@@ -59,6 +59,10 @@
         >
             Autolaunched with parameters: {{ parseParams(props.job.parameters) }}
         </v-list-item-subtitle>
+        <v-list-item-subtitle class="py-1">
+            <ClaudeGenerated class="mr-1" />
+            <NDIPVerified />
+        </v-list-item-subtitle>
 
         <template v-slot:append>
             <v-list-item-action class="mr-0">
@@ -112,6 +116,10 @@
 import { storeToRefs } from "pinia"
 import { ref } from "vue"
 
+import ClaudeGenerated from "@/components/badges/ClaudeGenerated.vue"
+import HumanMade from "@/components/badges/HumanMade.vue"
+import NDIPVerified from "@/components/badges/NDIPVerified.vue"
+import UnknownSource from "@/components/badges/UnknownSource.vue"
 import ToolStatus from "@/components/ToolStatus.vue"
 import { useJobStore } from "@/stores/job"
 import { useUserStore } from "@/stores/user"

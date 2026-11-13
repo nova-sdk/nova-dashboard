@@ -10,7 +10,7 @@ Live Data, Documentation) and then fans two of them out over the monitoring *tar
 
 An alert is attached to a group by its ``group`` key, and drills down to a child whose
 name matches the alert's ``alias`` or ``host_alias``. A group's heading then reports
-"(N of M up)" over its children, which is what RUN_SHEET 7.8 and 7.9 check.
+"(N of M up)" over its children.
 """
 
 import json
@@ -52,7 +52,7 @@ def alert(
 
 
 class StatusController:
-    """Mutable alert state, so a test can change alerts between 5s poll cycles (7.10)."""
+    """Mutable alert state, so a test can change alerts between 5s poll cycles."""
 
     def __init__(
         self,
