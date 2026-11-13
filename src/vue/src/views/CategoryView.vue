@@ -10,9 +10,9 @@
         <v-card width="800">
             <v-card-title class="text-center">{{ category.name }} Applications</v-card-title>
             <v-card-subtitle v-if="!user.is_logged_in">
-                The below tools are currently supported for running on Calvera. You must be signed
-                in to launch them. You may sign in using the button in the top right corner of this
-                page.
+                The below tools are currently supported for running on {{ galaxyAlias }}. You must
+                be signed in to launch them. You may sign in using the button in the top right
+                corner of this page.
             </v-card-subtitle>
 
             <v-card-text>
@@ -74,6 +74,7 @@ const { galaxy_error } = storeToRefs(job)
 const user = useUserStore()
 const category = ref(null)
 
+const galaxyAlias = import.meta.env.VITE_GALAXY_ALIAS
 const basePath = import.meta.env.VITE_BASE_PATH
 
 onMounted(async () => {

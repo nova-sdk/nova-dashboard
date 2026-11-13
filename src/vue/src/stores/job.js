@@ -66,7 +66,7 @@ export const useJobStore = defineStore("job", {
                 url: "",
                 url_ready: false
             }
-            this.updateCalveraSpinner()
+            this.updateGalaxySpinner()
 
             if (this.requires_galaxy_login) {
                 this.jobs[tool_id].state = "stopped"
@@ -109,7 +109,7 @@ export const useJobStore = defineStore("job", {
         async stopJob(job_id, tool_id) {
             if (tool_id !== undefined) {
                 this.jobs[tool_id].state = "stopping"
-                this.updateCalveraSpinner()
+                this.updateGalaxySpinner()
             }
 
             const stopped = await cancelJob(job_id)
@@ -275,7 +275,7 @@ export const useJobStore = defineStore("job", {
                     this.galaxy_error = `${galaxyAlias} failed to process your request. Please try again in a few minutes.`
                 }
 
-                this.updateCalveraSpinner()
+                this.updateGalaxySpinner()
 
                 // nextTick ensures that any updates to the UI from this monitoring loop have been committed.
                 // Setting this flag will allow users to launch tools, which should only be possible after
@@ -368,7 +368,7 @@ export const useJobStore = defineStore("job", {
             this.poll_timer = null
             this.stream_error = false
         },
-        updateCalveraSpinner() {
+        updateGalaxySpinner() {
             // Turn on the spinner in the footer if any job is being started or stopped
             this.running = Object.values(this.jobs).some((job) => {
                 return ["submitting", "new", "queued", "running", "stopping"].includes(job.state)

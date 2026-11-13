@@ -1,3 +1,7 @@
+### nova-dashboard, 2.0.2
+
+* Remove lingering references to Calvera (thanks to John Duggan).
+
 ### nova-dashboard, 2.0.1
 
 * Expose `dataset.misc_info` from Galaxy when a tool fails without stderr (thanks to John Duggan).

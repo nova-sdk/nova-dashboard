@@ -1,7 +1,7 @@
 # Introduction
 
 This repository is for the source code of the NOVA dashboard (running at https://nova.ornl.gov). The dashboard provides a
-way for users to launch interactive tools without going through Calvera.
+way for users to launch interactive tools without going through Galaxy's default UI.
 
 ## Install dependencies
 
