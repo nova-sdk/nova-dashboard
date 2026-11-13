@@ -33,8 +33,8 @@ We welcome feature suggestions! To propose a new feature:
 
 If you'd like to contribute code changes, please follow the following guidelines:
 
-- [Working on a feature](https://calvera.ornl.gov/docs/dev/project_management/gitlab/single-repo/)
-- [Style guidelines](https://calvera.ornl.gov/docs/dev/project_management/style_guidelines/)
+- [Working on a feature](https://ndip.ornl.gov/docs/dev_guide/contributing/gitlab/single-repo/)
+- [Style guidelines](https://ndip.ornl.gov/docs/dev_guide/contributing/style_guidelines/)
 
 ## Code of Conduct
 

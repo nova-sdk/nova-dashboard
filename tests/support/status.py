@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 
 from playwright.sync_api import Page, Route
 
-COMPUTE_NODES = ["calvera-1", "calvera-2", "calvera-3", "calvera-4"]
+COMPUTE_NODES = ["pulsar-1", "pulsar-2", "pulsar-3", "pulsar-4"]
 IDP_NODES = ["idp-1", "idp-2"]
 
 
